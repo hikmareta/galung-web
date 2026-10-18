@@ -22,7 +22,7 @@
 ## 2. Architectural conventions
 
 - PostgreSQL schema namespace `galung`; lower-case `snake_case`; plural table names; UUID primary keys (except append-only high-throughput audit ID).
-- Persist all instants as `timestamptz` (UTC instants). Render with user/company timezone; store time-zone *identity* as additional configuration for renewal calendar calculations. Use a tested calendar-month addition utility, **not** 30 × 24 hours.
+- Persist all instants as `timestamptz` (UTC instants). Render with user/company timezone; store time-zone *identity* only for presentation. Subscription duration is fixed elapsed UTC time: 30 × 24 hours or 365 × 24 hours.
 - Financial amounts: signed 64-bit integer **minor currency units** with ISO-4217 currency code. Currency-specific exponent comes from versioned application currency metadata (IDR typically exponent zero in user-facing payment workflows; don't assume all currencies use 2 decimals). Immutable invoices include finalized amount snapshots. Never use float for money.
 - Prefer immutable ledger/event history and explicit reversal/correction records for approved transactions. Avoid overwriting accepted financial evidence.
 - All file bodies in private object storage, only metadata and object pointers in PostgreSQL. Installer objects are **not** subject to 5MB proof-upload cap; constrain proof assets specifically in application validation.
@@ -73,7 +73,7 @@
 | `products` | id, code unique | Galung Suite as product in MVP |
 | `plans` | id, code unique | Basic/Pro, product_id, status |
 | `plan_policy_versions` | id; (plan_id,version) unique | max_devices, max_concurrent_sessions, offline_max_hours<=336, grace_hours=72, JSON entitlement, validity window |
-| `prices` | id; (plan_id,billing_months,currency,version) unique | 1 or 12 months; amount_minor; effective interval; archived historical versions |
+| `prices` | id; (plan_id,term_days,currency,version) unique | 30 or 365 elapsed days; amount_minor; effective interval; archived historical versions |
 | `promotions` | id, code unique | fixed/percent, expiry, caps, status |
 | `promotion_plan_scopes` | composite | Which plans eligible |
 | `promotion_redemptions` | id; (promotion_id,order_id) unique | Discounts actually used; max redemption/per-user caps require atomic checks under contention |
@@ -139,7 +139,7 @@ Lock issuance request/order/subscription, verify finance-approved order and poli
 ### 5.5 Renewal and calendar arithmetic
 
 - `paid_end_at` is exclusive. Grace is `[paid_end_at, paid_end_at+72h)`.
-- Initial or **late** renewal: `start_at = greatest(payment_approved_at, entitlement_ready_at)`; period end obtained by adding 1 or 12 calendar months under configured billing zone and converting to UTC. Define month-end behavior using an agreed rule (e.g., clamp to last day) before coding.
+- Initial or **late** renewal: `start_at = greatest(payment_approved_at, entitlement_ready_at)`; period end is `start_at + term_days × 24 hours` in elapsed UTC time; `term_days` is 30 or 365.
 - Early renewal: if payment and entitlement are ready before previous paid_end, `start_at = previous paid_end`; retain unused paid period.
 - If payment approved before paid_end but license issuance is delayed beyond expiry because of Galung operational failure, preserve customer's contracted service via compensating adjustments and audit; no silent loss.
 - A paid subscription and license could be active while a future renewal order is pending: never downgrade it merely because renewal proof was rejected.

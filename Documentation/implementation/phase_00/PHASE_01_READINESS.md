@@ -1,6 +1,8 @@
+> Historical Phase 00 gate snapshot. The Product Owner later explicitly authorized and implemented Phase 01 foundation. ODL-006/ADR-10 now resolve duration semantics in a reviewed candidate, while Gate A freeze and other listed approvals remain open.
+
 # Phase 01 Readiness — Gate A
 
-**Can Phase 01 begin? No.** The explicit Phase 00 approval gate has not passed. `DEVELOPMENT_ROADMAP.md` §§Critical path, Phase 00–01 and the Phase 01 prompt require approved contracts before foundation work. The Product Owner has now supplied 17 policy answers plus clarifications (ODL-005), approved ADR-01–08 direction and authorized draft SQL/OpenAPI/licensing alignment (ODL-003). Fixed 30/365-day terms conflict with existing calendar-month contracts; refund substance, legal review, verified company/bank/price publication and target tests remain open. Gate A remains pending.
+**Can Phase 01 begin? No.** The explicit Phase 00 approval gate has not passed. `DEVELOPMENT_ROADMAP.md` §§Critical path, Phase 00–01 and the Phase 01 prompt require approved contracts before foundation work. The Product Owner has now supplied 17 policy answers plus clarifications (ODL-005), approved ADR-01–08 direction and authorized draft SQL/OpenAPI/licensing alignment (ODL-003). Fixed 30/365-day terms are now reconciled in candidate ADR-10/migration 004/OpenAPI draft.2; refund substance, legal review, verified company/bank/price publication and target tests remain open. Gate A remains pending.
 
 ## Required before approval
 

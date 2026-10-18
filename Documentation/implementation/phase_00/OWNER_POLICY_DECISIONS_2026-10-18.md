@@ -17,14 +17,14 @@
 | 11 | Finance review on working days 09:00–17:00 WIB | Service hours approved; public promise of completion deadline/SLA remains TBD. Holiday calendar and bank settlement caveat required. |
 | 12 | Full purchased-plan features during 72-hour grace | Subject to signed entitlement bound and valid non-revoked state. Emergency suspension triggers remain TBD. |
 | 13 | License duration counted from license issuance, not payment | Aligns for initial/late terms if `license issuance` is defined as durable signed entitlement ready and claimable; early renewals must still extend from previous paid end under DEC-004. |
-| 14 | Subscription starts at issuance; 30 calendar days | Owner clarified fixed durations: monthly 30 calendar days and annual 365 calendar days from entitlement readiness for initial/late terms. Early renewal still extends from the existing paid end under DEC-004. Existing 1/12 calendar-month language and SQL calculations require a reviewed change. |
+| 14 | Subscription starts at issuance; 30 calendar days | Owner clarified fixed durations: monthly 30 × 24 hours and annual 365 × 24 hours from entitlement readiness for initial/late terms. Early renewal still extends from the existing paid end under DEC-004. The Product Owner chose option A on 2026-10-18: fixed elapsed UTC duration, not calendar-month arithmetic. Draft SQL/API/test reconciliation is recorded separately and remains subject to contract review. |
 | 15 | Proof size limit 10 MB | Change proposed from existing 5 MB UI/DB note; server, object storage, malware scanning and UI must use same limit. |
 | 16 | Proof, finance, audit and device data retained 12 months | Product preference recorded. Legal must validate category-specific statutory preservation, security logs, deletion requests and archive holds before a blanket deletion schedule is applied. |
 | 17 | Request draft terms and communication | Draft created, not legal-approved or publishable. |
 
 ## Decisions needed before contract freeze
 
-1. Amend calendar-month narrative, SQL/API term semantics and test matrix to fixed 30/365-day terms while preserving early-renewal and late-renewal rules.
+1. Review the amended narrative, additive SQL migration 004, API `termDays` semantics and boundary test matrix for fixed 30/365-day terms while preserving early-renewal and late-renewal rules.
 2. Refund eligibility, approval, partial-period calculation, payment reversal and entitlement effects.
 3. Legal review of IDR international transfers, tax/invoice obligations, company identity, terms and 12-month retention.
 4. Security/Desktop review of device proof, Windows support, offline revocation and key management; QA evidence of SQL/contract checks.

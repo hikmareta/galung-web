@@ -25,7 +25,7 @@
 ## Subscription & entitlement
 - [ ] Early renewal starts from current paid end when ready before expiry.
 - [ ] Late renewal starts at max(payment approval, entitlement ready).
-- [ ] End of paid period calculated by calendar months, including Jan 31, Feb 28/29, leap years.
+- [ ] End of paid period calculated as exactly 720 or 8,760 elapsed UTC hours, including Jan 31, Feb 28/29, leap years and DST changes.
 - [ ] Grace end equals paid end + exactly 72h.
 - [ ] Cancel renewal does not terminate current paid subscription early.
 - [ ] Duplicate license issuance and duplicate renewal service-period creation are impossible.

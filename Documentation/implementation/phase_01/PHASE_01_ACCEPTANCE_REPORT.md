@@ -1,3 +1,5 @@
+> **2026-10-18 contract addendum:** Product Owner choice A is now reflected in Phase 00 candidate ADR-10, additive migration 004 and OpenAPI 1.1.0-draft.2. Local PostgreSQL migration/constraint and OpenAPI checks passed; see `../phase_00/DURATION_RECONCILIATION_EVIDENCE.md`. The prior duration-conflict finding below is historical; financial/legal values, canonical freeze, independent review records and unenforced private branch protection still block approval. PR #1 remains draft; Phase 02 has not started.
+
 # Phase 01 — Current Acceptance Report
 
 **Date:** 2026-10-18 (Asia/Jakarta)
@@ -8,7 +10,7 @@
 
 Reviewed `AGENTS.md`, documentation index, PRD/business rules, AI rules, roadmap, Phase 01 prompt, global acceptance gates, UI/UX, database, API and licensing specifications, Phase 00 decisions/manifest, source, tests and GitHub configuration. The Product Owner explicitly authorized Phase 01 and restored the GitHub repository to **private** before the latest correction branch was pushed. The Product Owner states Tech Lead, Security and QA approvals were given manually; names, dates, scope and review artifacts have not been supplied, so this is recorded as an owner attestation rather than independently verified signoffs.
 
-The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/365-day owner decision conflicts with calendar-month SQL/API and validation text. Draft SQL remains production-disabled. Phase 01 has no commerce, subscription or licensing endpoint, so those unresolved contracts are isolated from running Phase 01 behavior. They still block production promotion and contract-dependent later work.
+The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. The fixed 30/365-day decision is reconciled in candidate migration 004, OpenAPI 1.1.0-draft.2 and ADR-10, with local PostgreSQL and contract tests passed. Draft SQL remains production-disabled. Phase 01 has no commerce, subscription or licensing endpoint, so the remaining unapproved financial/legal and protocol contracts are isolated from running Phase 01 behavior. They still block production promotion and contract-dependent later work.
 
 ## Implemented foundation
 
@@ -39,7 +41,7 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 
 | ID | Priority | Current evidence / risk | Disposition |
 |---|---|---|---|
-| P01 | P0 | Phase 00 candidate contracts retain fixed-term versus calendar-month conflict and missing finance/legal production values. | Blocks production contract-dependent functionality; cannot be invented or self-approved. Preserve draft-only migration guard. |
+| P01 | P0 | Phase 00 duration is reconciled in candidate contract 004/OpenAPI draft.2, but finance/legal values and Gate A freeze remain open. | Blocks production contract-dependent functionality; cannot be invented or self-approved. Preserve draft-only migration guard. |
 | P02 | P1 (resolved) | Correction branch `8c52dbb` is pushed; [PR #1](https://github.com/hikmareta/galung-web/pull/1) has green hosted `verify`, `secrets`, and `staging-smoke`. It remains draft pending the separate gate blockers. | Keep PR unmerged until branch protection and review evidence are resolved. |
 | P08 | P0 | GitHub reports the configured `main` rule is **unenforced** on this private repository under the current personal account. PR #1 currently offers a merge button despite no recorded approval. | Move repository into a GitHub Team/Enterprise organization with effective protection, or obtain an equivalent supported protected private-repository plan and verify an unapproved PR cannot merge. Do not merge meanwhile. |
 | P03 | P1 | Owner attests manual Tech Lead/Security/QA approval, but no attributable review record is present. | Attach reviewer identity, date, scope and outcome to the phase gate; owner attestation alone is not an independent audit record. |
@@ -55,7 +57,7 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 | Completeness | Required foundation and ephemeral staging are implemented and passed hosted checks at `8c52dbb`; repository gate remains blocked. |
 | Approved requirements | DEC-001–006 are preserved by absence of economic endpoints; draft production contracts remain open. |
 | UI/UX | Bilingual semantic shells fit tested viewports. Product screens and interactive accessibility belong to later phases. |
-| Database/API | Draft migrations pass positive PostgreSQL 16 and local negative tests; operational OpenAPI matches tested handlers. Canonical duration contract remains unresolved. |
+| Database/API | Draft migrations pass positive PostgreSQL 16 and local negative tests; operational OpenAPI matches tested handlers. Duration semantics are reconciled in candidate 004/OpenAPI draft.2 and locally tested; canonical freeze remains unresolved. |
 | Security/authorization | Global guard defaults to deny and logs omit arbitrary sensitive content. GitHub's private-repository `main` rule is configured but unenforced; this blocks the repository gate. Real identity/object-scoped enforcement remains Phase 02. |
 | Code quality | Strict TS; deterministic Turbo task graph; runbook and ADR added. Next lint warning remains. |
 | Unit/integration | 17 actual unit tests plus live negative HTTP probe and disposable DB migration tests. Current-revision hosted CI and staging pass. |
@@ -68,7 +70,7 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 | Criterion | Status | Evidence / limit |
 |---|---|---|
 | Owner authorization for Phase 01 foundation | PASS | Explicit instruction in this chat. |
-| Frozen Phase 00 production contracts | BLOCKED | Candidate manifest and duration conflict; not needed by Phase 01 shell runtime but required before contract-dependent production work. |
+| Frozen Phase 00 production contracts | BLOCKED | Candidate manifest, finance/legal values and pending signoffs; duration semantics have a tested candidate, but production freeze is required before contract-dependent work. |
 | pnpm monorepo and web/admin/API | PASS | Workspace/source and forced build. |
 | PostgreSQL/Redis local definitions | PASS | Compose files and hosted service containers; local Docker daemon unavailable. |
 | Environment validation | PASS | Zod tests, production TLS rejection/acceptance; hosted `check:env`. |

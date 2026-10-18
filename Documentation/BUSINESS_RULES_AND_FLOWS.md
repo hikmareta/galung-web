@@ -22,10 +22,10 @@
 - `bank_received_at`: funds appear as credited in company records.
 - `payment_approved_at`: authorized finance administrator approves after validating bank credit.
 - `entitlement_ready_at`: license has been validly issued and can be accessed; `service_start_at = max(payment_approved_at, entitlement_ready_at)` for new and late-renewed subscriptions.
-- `paid_end_at`: exclusive expiry instant after monthly/yearly calendar-based period.
+- `paid_end_at`: exclusive expiry instant after fixed 30 × 24-hour or 365 × 24-hour term.
 - `grace_end_at = paid_end_at + 72 hours` (exclusive).
 - `offline_expires_at = min(last_successful_online_check + 14 days, entitlement_authorized_end_at)`.
-- Times stored in UTC; show localized absolute date/time with timezone. Billing terms calculated by calendar months/years in the established billing time zone; define behavior for month-end/leap days in tests.
+- Times stored in UTC; show localized absolute date/time with timezone. Billing terms use elapsed UTC hours: monthly = 720 hours, annual = 8,760 hours. Month-end, leap dates and daylight-saving changes do not change their duration; test these boundaries.
 
 ## 3. Canonical payment flow
 

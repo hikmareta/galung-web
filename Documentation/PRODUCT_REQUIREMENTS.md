@@ -176,7 +176,7 @@ The commercial MVP sells **Galung Basic and Galung Pro only**. The site and data
 ### FR-06 Subscription lifecycle (P0)
 
 - FR-06.01 Start paid service only after verified payment plus successful entitlement issuance/activation readiness.
-- FR-06.02 Monthly/yearly periods use calendar-aware arithmetic and timestamps; store UTC and display localized dates/timezones.
+- FR-06.02 Monthly/yearly periods are exactly 720/8,760 elapsed UTC hours and use UTC timestamps; store UTC and display localized dates/timezones.
 - FR-06.03 For early renewal, preserve remaining paid term and extend from previous paid term's end.
 - FR-06.04 For renewal after paid expiration, new service starts when payment is approved and entitlement is ready; never retroactively bill expired gap.
 - FR-06.05 Allow grace for exactly 72 hours after paid expiry, maintaining policy-defined last entitlement; grace ends at exclusive timestamp.

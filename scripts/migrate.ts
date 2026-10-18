@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 const migrations = [
   ['001_core_schema', 'Documentation/database/001_core_schema.sql'],
   ['003_phase00_contract_delta', 'Documentation/database/003_phase00_contract_delta.sql'],
+  ['004_fixed_subscription_terms', 'Documentation/database/004_fixed_subscription_terms.sql'],
 ] as const;
 const environment = process.env.APP_ENV;
 if (!['local', 'test', 'staging'].includes(environment ?? '')) throw new Error('Draft migrations cannot run in production');

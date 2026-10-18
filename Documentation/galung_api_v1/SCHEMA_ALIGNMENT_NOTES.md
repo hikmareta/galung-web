@@ -16,7 +16,7 @@ Baseline: `/mnt/data/galung_database_v1/001_core_schema.sql`. The API spec is **
 | ALIGN-08 | Promo | Existing `promotions` and scoped plans | Atomic redemption caps, explicit percent rounding and currency exponent, invoice snapshot | P1 |
 | ALIGN-09 | Tax / legal | Invoice has amount snapshot | Terms/privacy consent history, invoice legal contents, country taxation rules require legal validation and additional consent records | P0 |
 | ALIGN-10 | Device model | `devices` fingerprint_hash by owner | Define fingerprint derivation with user privacy/security review; token replay limits; concurrency enforcement | P0 |
-| ALIGN-11 | Subscription updates | `subscription_periods.start_at >= payment_approved_at AND entitlement_ready_at` | On-time pre-expiry renewals compatible when future start >= both; compute calendar future end without 30-day approximations | P0 |
+| ALIGN-11 | Subscription updates | `subscription_periods.start_at >= payment_approved_at AND entitlement_ready_at` | On-time pre-expiry renewals compatible when future start >= both; compute future end with exact 720/8,760 elapsed hours | P0 |
 | ALIGN-12 | Plan policy | `offline_max_hours <= 336`, `grace_hours=72` | System-wide product decision max 336h; choose whether each plan can set shorter offline duration or fixed 336h; initial MVP default 336h | P1 |
 | ALIGN-13 | CMS | `cms_pages`, `cms_revisions` | Need workflow and role checks at service level, optimistic revisions; portfolio/media publication API remains uncontracted | P1 |
 | ALIGN-14 | Admin lifecycle | `bank_account_change_requests` | Add proposal / dual approval / publish endpoint specs before bank account mutation feature is offered | P0 |

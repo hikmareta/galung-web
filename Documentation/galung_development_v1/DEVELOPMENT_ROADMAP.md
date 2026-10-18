@@ -94,7 +94,7 @@
 - **Scope:** Implement start when finance-approved and entitlement-ready, on-time extension from existing period end, post-expiry from newly ready time, temporal locks and queue-driven reminders.
 - **Inputs:** Approved payment ledger + plan policy.
 - **Outputs:** Subscription periods, renewals, 72h grace, entitlement-ready start, reminder events, finance-safe states.
-- **Gate/exit:** Clock boundary tests incl DST/calendar month and 72h; failed issuance never burns customer term; no double renewal from retry.
+- **Gate/exit:** Clock boundary tests incl DST, month-end, leap dates, fixed 720/8,760h and 72h; failed issuance never burns customer term; no double renewal from retry.
 - **Priority:** P0; **estimate:** 3–4 weeks.
 
 ### Phase 07 — License Issuance, Signing & Security

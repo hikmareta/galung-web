@@ -10,6 +10,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 API = json.loads((ROOT / "galung_api_v1/openapi.json").read_text())
 SQL = (ROOT / "database/003_phase00_contract_delta.sql").read_text()
+TERM_SQL = (ROOT / "database/004_fixed_subscription_terms.sql").read_text()
 
 
 class ContractDraftTests(unittest.TestCase):
@@ -51,6 +52,17 @@ class ContractDraftTests(unittest.TestCase):
         self.assertIn("bank_change_mfa_pair", SQL)
         self.assertIn("reviewed_by <> requested_by", SQL)
         self.assertNotIn("payment-gateway", " ".join(API["paths"]))
+
+    def test_fixed_subscription_term_contract(self) -> None:
+        schemas = API["components"]["schemas"]
+        self.assertEqual(schemas["Price"]["properties"]["termDays"]["enum"], [30, 365])
+        create = API["paths"]["/admin/plans/{id}/prices"]["post"]
+        body = create["requestBody"]["content"]["application/json"]["schema"]
+        self.assertEqual(body["properties"]["termDays"]["enum"], [30, 365])
+        self.assertNotIn("billingMonths", json.dumps(API))
+        self.assertIn("subscription_periods_fixed_duration_check", TERM_SQL)
+        self.assertIn("(term_days * 24) * interval '1 hour'", TERM_SQL)
+        self.assertIn("CASE term_days WHEN 1 THEN 30 WHEN 12 THEN 365 END", TERM_SQL)
 
     def test_desktop_contract(self) -> None:
         for path in [

@@ -13,7 +13,7 @@ This document extends `PRODUCT_REQUIREMENTS.md`, `BUSINESS_RULES_AND_FLOWS.md`, 
 - **Accessibility:** semantic headings, navigation landmarks, explicit field labels, associated errors, keyboard-operated dialogs, focus return, WCAG 2.2 AA target; animations respect reduced-motion; video captions and transcript; no audio-only interactions.
 - **State contract for every async component:** `initial`, `loading` (announce busy), `success`, `empty`, `validation_error`, `server_error` (retry), `unauthorized`, `forbidden`, and `stale/conflict` where relevant. Use non-destructive recovery flows.
 - **Money:** always show currency code (e.g. `IDR 1,234,000`), never browser-inferred FX as payable total. The approved quote, invoice amount, payable currency and beneficiary snapshot must match server record.
-- **Dates:** human-readable plus zone for transfer due, approval, subscription paid_end and grace_end. Back-end stores UTC and calculates calendar month/year with approved rules.
+- **Dates:** human-readable plus zone for transfer due, approval, subscription paid_end and grace_end. Back-end stores UTC and calculates fixed 30 × 24-hour or 365 × 24-hour terms; display localized absolute dates and timezone.
 - **Feedback:** actionable text for errors; confirmation dialogs for irreversible actions; status badges must include words, not only colors. No optimistic display of finance approvals or license issuance.
 - **Analytics/privacy:** collect event names and non-sensitive IDs, not proof images, bank account data, license secrets, or personal input values.
 
