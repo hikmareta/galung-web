@@ -48,6 +48,9 @@ jobs:
       - run: pnpm audit --audit-level high
   secrets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:

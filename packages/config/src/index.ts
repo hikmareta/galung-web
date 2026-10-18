@@ -16,7 +16,13 @@ export function parseConfig(input: NodeJS.ProcessEnv): AppConfig {
     if (values.some(value => /localhost|127\.0\.0\.1|example\.invalid|REPLACE_WITH/i.test(value))) {
       throw new Error('Non-local environment cannot use local or placeholder service URLs');
     }
-    if (config.APP_ENV === 'production' && config.NODE_ENV !== 'production') throw new Error('Production requires NODE_ENV=production');
+    if (config.APP_ENV === 'production') {
+      if (config.NODE_ENV !== 'production') throw new Error('Production requires NODE_ENV=production');
+      if (!config.NEXT_PUBLIC_API_BASE_URL.startsWith('https://')) throw new Error('Production API URL requires HTTPS');
+      if (!config.REDIS_URL.startsWith('rediss://')) throw new Error('Production Redis URL requires TLS');
+      const dbTls = new URL(config.DATABASE_URL).searchParams.get('sslmode');
+      if (!['require', 'verify-ca', 'verify-full'].includes(dbTls ?? '')) throw new Error('Production PostgreSQL URL requires TLS');
+    }
   }
   return config;
 }

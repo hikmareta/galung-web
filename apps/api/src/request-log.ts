@@ -9,7 +9,7 @@ export class RequestLogMiddleware implements NestMiddleware {
     res.setHeader('X-Request-ID', requestId);
     const started = Date.now();
     res.on('finish', () => {
-      process.stdout.write(JSON.stringify({ level: 'info', event: 'http.request', requestId, method: req.method, route: req.path, status: res.statusCode, durationMs: Date.now() - started, time: new Date().toISOString() }) + '\n');
+      process.stdout.write(JSON.stringify({ level: 'info', event: 'http.request', requestId, method: req.method, status: res.statusCode, durationMs: Date.now() - started, time: new Date().toISOString() }) + '\n');
     });
     next();
   }
