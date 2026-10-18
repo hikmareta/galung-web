@@ -1,0 +1,14 @@
+-- INFORMATIONAL FUTURE RELEASE MIGRATION SKETCH -- DO NOT DEPLOY IN MVP
+-- This file is illustrative pseudocode-quality DDL. Requires product/rights approval.
+-- Release 2 Song Library separate subscription/product:
+-- songs(id uuid PK, title, composer, arranger, difficulty, duration, status)
+-- song_versions(id uuid PK, song_id FK, format, file_asset_id FK, checksum, published_at)
+-- song_rights(id uuid PK, song_id FK, rights_holder, territory, valid_from, valid_to, terms)
+-- song_entitlements(id uuid PK, user_id FK, source_subscription_id FK, permitted_actions, starts_at, ends_at)
+-- song_downloads(id uuid PK, song_version_id FK, user_id FK, entitlement_id FK, downloaded_at)
+-- Release 3 organizations / institutional access:
+-- organizations(id uuid PK, name, billing_owner_id FK, country, status)
+-- organization_memberships(organization_id FK, user_id FK, role, joined_at, PK(organization_id,user_id))
+-- seat_pools(id uuid PK, organization_id FK, product_id FK, subscription_id FK, seats_purchased)
+-- seat_assignments(id uuid PK, seat_pool_id FK, assignee_user_id FK, assigned_at, revoked_at)
+-- Distinguish Galung Suite seat from Song Library Premium seat; do not assign content seat to visual-only audience members.

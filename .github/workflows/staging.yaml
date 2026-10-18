@@ -1,0 +1,49 @@
+name: Ephemeral Staging
+on:
+  workflow_dispatch:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  staging-smoke:
+    environment: staging
+    runs-on: ubuntu-latest
+    container: node:22-bookworm
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: galung_staging
+          POSTGRES_USER: galung_migrator
+          POSTGRES_PASSWORD: ephemeral_migrator_only
+        options: >-
+          --health-cmd "pg_isready -U galung_migrator -d galung_staging" --health-interval 5s --health-timeout 3s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 12
+    env:
+      NODE_ENV: production
+      APP_ENV: staging
+      ALLOW_DRAFT_MIGRATIONS: 'true'
+      API_PORT: 4000
+      DATABASE_URL: postgresql://galung_app:ephemeral_app_only@postgres:5432/galung_staging
+      MIGRATION_DATABASE_URL: postgresql://galung_migrator:ephemeral_migrator_only@postgres:5432/galung_staging
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_API_BASE_URL: http://api.staging.internal
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Create restricted application database identity
+        run: node --import tsx scripts/create-staging-app-role.ts
+      - run: pnpm check:env
+      - run: pnpm db:migrate
+      - run: pnpm build
+      - name: Start and probe all applications
+        run: |
+          pnpm --filter @galung/api start > /tmp/galung-api.log 2>&1 & api_pid=$!
+          pnpm --filter @galung/web start > /tmp/galung-web.log 2>&1 & web_pid=$!
+          pnpm --filter @galung/admin start > /tmp/galung-admin.log 2>&1 & admin_pid=$!
+          trap 'kill "$api_pid" "$web_pid" "$admin_pid" 2>/dev/null || true' EXIT
+          node scripts/smoke-staging.mjs

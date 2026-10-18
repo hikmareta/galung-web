@@ -1,0 +1,54 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: galung
+          POSTGRES_USER: galung
+          POSTGRES_PASSWORD: local_only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U galung -d galung" --health-interval 5s --health-timeout 3s --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 12
+    env:
+      NODE_ENV: test
+      APP_ENV: test
+      API_PORT: 4000
+      DATABASE_URL: postgresql://galung:local_only@localhost:5432/galung
+      REDIS_URL: redis://localhost:6379
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:env
+      - run: pnpm db:migrate
+      - run: pnpm db:check
+      - run: python3 scripts/verify-workflow.py
+      - run: python3 -m unittest Documentation/implementation/phase_00/verify_contracts.py -v
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm audit --audit-level high
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if grep -R -n -E '(BEGIN (RSA|OPENSSH|EC|PRIVATE) KEY|AKIA[0-9A-Z]{16})' --exclude-dir=.git --exclude='ci.yaml' .; then exit 1; fi

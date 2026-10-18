@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: Galung Operational Health API
+  version: 0.1.0-phase01
+  description: Phase 01 operational endpoints, separate from the Phase 00 commercial API draft.
+servers:
+  - url: http://localhost:4000/api/v1
+paths:
+  /health/live:
+    get:
+      operationId: get_health_live
+      security: []
+      responses:
+        '200':
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /health/ready:
+    get:
+      operationId: get_health_ready
+      security: []
+      responses:
+        '200':
+          description: PostgreSQL and Redis are available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          description: Dependency unavailable.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        const: DEPENDENCY_UNAVAILABLE
+                      message:
+                        type: string
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: ok

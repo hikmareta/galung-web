@@ -1,0 +1,32 @@
+{
+  "name": "galung-platform",
+  "private": true,
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "check:env": "node --import tsx scripts/check-env.ts",
+    "db:migrate": "node --import tsx scripts/migrate.ts",
+    "db:check": "node --import tsx scripts/check-db.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "eslint": "^9.25.1",
+    "tsx": "^4.19.3",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.0",
+    "pg": "^8.16.0",
+    "@types/pg": "^8.15.4",
+    "typescript-eslint": "^8.46.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "tinypool": "^2.1.2",
+      "postcss": "^8.5.18"
+    }
+  }
+}
