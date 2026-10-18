@@ -81,6 +81,7 @@ Use `README.md` for local boot. Check `/`, `/health` on web/admin and API `/api/
 - `apps/admin/next.config.ts`
 - `apps/admin/package.json`
 - `apps/admin/tsconfig.json`
+- `apps/api/openapi/operational.yaml`
 - `apps/api/package.json`
 - `apps/api/src/health.ts`
 - `apps/api/src/logger.ts`
@@ -114,6 +115,12 @@ Use `README.md` for local boot. Check `/`, `/health` on web/admin and API `/api/
 - `pnpm-workspace.yaml`
 - `scripts/check-db.ts`
 - `scripts/check-env.ts`
+- `scripts/create-staging-app-role.ts`
 - `scripts/migrate.ts`
+- `scripts/smoke-staging.mjs`
 - `scripts/verify-workflow.py`
 - `turbo.json`
+
+## Subsequent Phase 01 handoff update
+
+An operational OpenAPI file now documents health routes separately from the Phase 00 commercial draft. The migration runner rejects production, requires staging opt-in and a dedicated migration URL, and serializes runs with an advisory lock. An ephemeral PostgreSQL 16/Redis staging workflow builds and probes the apps; hosted execution is still pending. GitHub repository `hikmareta/galung-web` was verified public and empty. A local initial commit was prepared, but automatic approval review rejected publication of its 127-file documentation/code payload to that public repository without explicit Product Owner consent. No GitHub push or branch protection occurred.
