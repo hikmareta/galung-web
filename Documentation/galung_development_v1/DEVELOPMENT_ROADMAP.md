@@ -18,6 +18,8 @@
 | 00 | Contract Reconciliation & Decisions | 2–3 weeks | PRD/API/DB/licensing alignment, finance/legal decisions, contract freeze | P0 |
 | 01 | Engineering Foundation & CI/CD | 2–3 weeks | Approved phase 00 contracts | P0 |
 | 02 | Identity, RBAC & Account Security | 2–3 weeks | Foundation + identity ADR | P0 |
+
+**2026-10-18 scoped Gate A amendment selected (ODL-007):** Phase 02 may begin only after the Phase 01 exit is explicitly approved and a versioned identity SQL/OpenAPI/ADR contract receives Security, Tech Lead and QA review. This is an identity-only exception to the full Gate A dependency. The full commercial contract remains candidate and all non-identity Gate A P0 items continue to block their affected phases. Selection of the amendment is not itself a Phase 02 start authorization.
 | 03 | Catalog, Pricing, Bank Configuration & CMS | 3–4 weeks | Auth + schema versioned | P0 |
 | 04 | Checkout, Orders & Invoices | 2–3 weeks | Catalog + identity + currencies approved | P0 |
 | 05 | Payment Proof & Manual Finance Verification | 3–4 weeks | Orders + private storage + audit | P0 |
@@ -60,7 +62,7 @@
 ### Phase 02 — Identity, RBAC & Account Security
 
 - **Scope:** Implement rate-limited identity endpoints, secure cookie/session and CSRF policy, role permissions, session revocation, user profile, terms acceptance and owner-scoped queries.
-- **Inputs:** Foundation + identity ADR.
+- **Inputs:** Approved Phase 01 foundation exit + reviewed and versioned identity ADR/SQL/OpenAPI contract under ODL-007. Full commercial Gate A remains required before implementing price, bank, checkout, payment, subscription, entitlement, licensing or desktop activation behavior.
 - **Outputs:** Register/login/logout, email verification, password reset, admin MFA, sessions, role enforcement, audit.
 - **Gate/exit:** Cross-tenant/IDOR tests deny access; admin MFA enforced; tokens and reset links cannot be replayed; login and recovery E2E pass.
 - **Priority:** P0; **estimate:** 2–3 weeks.

@@ -2,6 +2,8 @@
 
 **Status:** CANDIDATE / NOT FROZEN. This is a reproducible inventory of the aligned Phase 00 draft, not a frozen production contract. Product Owner reports prices, features, device/concurrency limits, bank/currency/fee, tax/refund and legal-identity values are all **TBD** (2026-10-18). The Product Owner approved ADR-01–08 architecture/control direction and selected fixed 720/8,760-hour terms in ODL-006/ADR-10 and authorized draft alignment of SQL, OpenAPI and licensing; financial values remain TBD and Gate A remains pending.
 
+**ODL-007 scope decision:** The Product Owner selected an identity-only Gate A amendment path for Phase 02. No identity contract version/hash is frozen yet; Security, Tech Lead and QA review and Phase 01 exit approval remain prerequisites. This manifest and all commercial contracts retain `CANDIDATE / NOT FROZEN` status. See `GATE_A_DECISION_OPTIONS.md`.
+
 | Contract | Actual file | Declared version | SHA-256 | Authority / gap |
 |---|---|---|---|---|
 | Product | `Documentation/PRODUCT_REQUIREMENTS.md` | v1.0 | `cb25c6077ca50bf441985e261e41f0ac207c068405b42c9b95c20416cdd403fc` | Binding DEC-001–006; TBD values remain open |

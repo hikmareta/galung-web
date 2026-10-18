@@ -1,8 +1,8 @@
 # Gate A decision options for the Product Owner
 
-**Prepared:** 2026-10-18 (Asia/Jakarta). **Status:** decision requested; no option is approved by this document.
+**Prepared:** 2026-10-18 (Asia/Jakarta). **Status:** Product Owner selected Option B in this chat on 2026-10-18; scoped identity contract review and the Phase 01 exit decision remain pending. This document does not declare Gate A frozen or Phase 02 started.
 
-The current roadmap requires a frozen Phase 00 contract before Phase 02. The [candidate manifest](CONTRACT_VERSION_MANIFEST.md) remains `CANDIDATE / NOT FROZEN`, and [reconciliation backlog](RECONCILIATION_BACKLOG.md) has open P0 items. PR #1 merged the Phase 01 foundation at reviewed head `fd7a62c`; the local duration reconciliation and evidence updates need a separate PR, fresh checks and review. This document offers an explicit path without treating unresolved commercial terms as approved values.
+The original roadmap requires a frozen Phase 00 contract before Phase 02. The [candidate manifest](CONTRACT_VERSION_MANIFEST.md) remains `CANDIDATE / NOT FROZEN`, and [reconciliation backlog](RECONCILIATION_BACKLOG.md) has open P0 items. PR #1 merged the Phase 01 foundation at reviewed head `fd7a62c`; [PR #2](https://github.com/hikmareta/galung-web/pull/2) now proposes the duration reconciliation and evidence updates with fresh checks and review pending. The Product Owner's Option B selection changes the planned path, subject to the scoped prerequisites below; it does not approve unresolved commercial terms.
 
 ## Option A — Full Gate A freeze before Phase 02
 
@@ -12,7 +12,7 @@ Keep the roadmap gate unchanged. Supply and approve the Basic/Pro entitlement an
 
 ## Option B — Limited identity-only gate amendment (recommended for progress)
 
-The Product Owner explicitly amends the Phase 02 prerequisite for a narrow identity and account-security scope. Freeze only the identity contract needed by Phase 02: user/session model, role and ownership semantics, secure cookie/CSRF policy, recovery and email verification, admin MFA, audit events, consent-version behavior, and the corresponding SQL/OpenAPI contract. Security and Tech Lead review ADR-01/D-01/CR-01/CR-13 and the scoped SQL/OpenAPI diff; QA records identity acceptance and negative-test coverage. The Product Owner approves the changed dependency and Phase 01 handoff. Record the change in the roadmap, Phase 02 prompt, version manifest and acceptance report before starting Phase 02.
+The Product Owner selects an amendment of the Phase 02 prerequisite for a narrow identity and account-security scope. Freeze only the identity contract needed by Phase 02: user/session model, role and ownership semantics, secure cookie/CSRF policy, recovery and email verification, admin MFA, audit events, consent-version behavior, and the corresponding SQL/OpenAPI contract. Security and Tech Lead review ADR-01/D-01/CR-01/CR-13 and the scoped SQL/OpenAPI diff; QA records identity acceptance and negative-test coverage. The Product Owner then approves the Phase 01 handoff for this limited scope. Record the scoped contract version, reviews and final gate verdict in the roadmap, Phase 02 prompt, version manifest and acceptance report before starting Phase 02.
 
 **Hard boundary:** No price, bank, checkout, payment, subscription, entitlement, license or desktop activation feature is implemented, enabled or migrated to production under this amendment. All other open Gate A P0 items remain blockers for the phases that use them, and the full commercial contract remains `CANDIDATE / NOT FROZEN`. Draft migrations retain the production guard. A later full Gate A decision is still required.
 
