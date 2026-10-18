@@ -1,7 +1,7 @@
 # Fixed subscription term reconciliation evidence
 
-**Date:** 2026-10-18 (Asia/Jakarta)  
-**Decision:** ODL-006 / ADR-10, option A.  
+**Date:** 2026-10-18 (Asia/Jakarta)
+**Decision:** ODL-006 / ADR-10, option A.
 **Status:** Tested candidate contract, **not** frozen or approved for production.
 
 ## Contract change
