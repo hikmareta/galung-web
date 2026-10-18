@@ -12,7 +12,7 @@ The API exposes `/api/v1/health/live` and `/api/v1/health/ready`. Liveness only 
 
 ## Ephemeral staging
 
-`.github/workflows/staging.yaml` runs on pull requests and manual dispatch. It creates PostgreSQL 16 and Redis in the GitHub runner, creates a restricted application database identity, applies the two approved-for-test draft SQL files with explicit `ALLOW_DRAFT_MIGRATIONS=true`, builds all apps, and probes four health endpoints. The environment is destroyed after the run. Inspect the `staging-smoke` check on the pull request. `main` requires `verify`, `secrets`, and `staging-smoke` plus one approval. A permanent staging service needs a separate hosting, credential, TLS and isolation decision.
+`.github/workflows/staging.yaml` runs on pull requests and manual dispatch. It creates PostgreSQL 16 and Redis in the GitHub runner, creates a restricted application database identity, applies the two approved-for-test draft SQL files with explicit `ALLOW_DRAFT_MIGRATIONS=true`, builds all apps, and probes four health endpoints. The environment is destroyed after the run. Inspect the `staging-smoke` check on the pull request. The `main` rule is configured to require `verify`, `secrets`, and `staging-smoke` plus one approval, but GitHub reports it is not enforced on this private repository under the personal account. Do not merge until protection is effective on a supported GitHub Team/Enterprise organization or equivalent supported plan. A permanent staging service needs a separate hosting, credential, TLS and isolation decision.
 
 ## Failed checks and migration recovery
 

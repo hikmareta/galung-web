@@ -1,12 +1,12 @@
 # Phase 01 — Current Acceptance Report
 
 **Date:** 2026-10-18 (Asia/Jakarta)
-**Recommendation:** REQUIRES CORRECTIONS pending hosted verification of the current changes and a documented phase gate.
+**Recommendation:** BLOCKED pending enforceable private-repository branch protection and a documented phase gate.
 **Approval:** Not granted; Phase 02 has not started. Previous evaluations are preserved in `PHASE_01_ACCEPTANCE_HISTORY.md`.
 
 ## Scope and governing decisions
 
-Reviewed `AGENTS.md`, documentation index, PRD/business rules, AI rules, roadmap, Phase 01 prompt, global acceptance gates, UI/UX, database, API and licensing specifications, Phase 00 decisions/manifest, source, tests and GitHub configuration. The Product Owner explicitly authorized Phase 01 and later made the GitHub repository public to enable branch protection. The Product Owner states Tech Lead, Security and QA approvals were given manually; names, dates, scope and review artifacts have not been supplied, so this is recorded as an owner attestation rather than independently verified signoffs.
+Reviewed `AGENTS.md`, documentation index, PRD/business rules, AI rules, roadmap, Phase 01 prompt, global acceptance gates, UI/UX, database, API and licensing specifications, Phase 00 decisions/manifest, source, tests and GitHub configuration. The Product Owner explicitly authorized Phase 01 and restored the GitHub repository to **private** before the latest correction branch was pushed. The Product Owner states Tech Lead, Security and QA approvals were given manually; names, dates, scope and review artifacts have not been supplied, so this is recorded as an owner attestation rather than independently verified signoffs.
 
 The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/365-day owner decision conflicts with calendar-month SQL/API and validation text. Draft SQL remains production-disabled. Phase 01 has no commerce, subscription or licensing endpoint, so those unresolved contracts are isolated from running Phase 01 behavior. They still block production promotion and contract-dependent later work.
 
@@ -15,7 +15,7 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 - pnpm/Turborepo monorepo, strict TypeScript, Next.js web/admin shells, NestJS API, PostgreSQL/Redis local definitions, validated environment config, migration/check tooling, CI and ephemeral staging.
 - Global fail-closed permission guard with explicit public health routes. The RBAC helper and guard enforce permission/MFA decisions in tests; real identity, record ownership and query scoping remain Phase 02 work.
 - API liveness/readiness with a stable 503 error envelope, operational OpenAPI, request IDs and logs that omit arbitrary framework messages, URL paths, query strings and bodies.
-- Protected public `main`: pull request and one approval, stale review dismissal, current `verify`, `secrets` and `staging-smoke` checks from GitHub Actions, resolved conversations, no administrator bypass, force push or deletion. [Rule 85006403](https://github.com/hikmareta/galung-web/settings/branch_protection_rules/85006403), [screenshot](branch-protection-verified-full.jpg).
+- A `main` branch rule is configured for pull requests, one approval, stale review dismissal, `verify`, `secrets` and `staging-smoke` from GitHub Actions, resolved conversations, no administrator bypass, force push or deletion. **GitHub explicitly says this rule is not enforced on the current private repository until it moves to a GitHub Team or Enterprise organization account.** The former public-repository [screenshot](branch-protection-verified-full.jpg) is historical; [current private-repository evidence](branch-protection-private-unenforced.png) controls this assessment.
 - [Runbook](OPERATIONS_RUNBOOK.md), [traceability](REQUIREMENT_TRACEABILITY.md), and [operational API ADR](ADR-09-OPERATIONAL-HEALTH-CONTRACT.md).
 
 ## Executed tests and evidence
@@ -39,7 +39,8 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 | ID | Priority | Current evidence / risk | Disposition |
 |---|---|---|---|
 | P01 | P0 | Phase 00 candidate contracts retain fixed-term versus calendar-month conflict and missing finance/legal production values. | Blocks production contract-dependent functionality; cannot be invented or self-approved. Preserve draft-only migration guard. |
-| P02 | P1 | Current source changes have not yet run on GitHub CI/staging or been reviewed through a protected pull request. | Push a Phase 01 correction branch; require hosted `verify`, `secrets`, `staging-smoke` and review. |
+| P02 | P1 | Correction branch `2dee0b2` is pushed and [PR #1](https://github.com/hikmareta/galung-web/pull/1) is open; hosted checks were still running at this report update. | Require hosted `verify`, `secrets`, `staging-smoke` and review before merge. |
+| P08 | P0 | GitHub reports the configured `main` rule is **unenforced** on this private repository under the current personal account. PR #1 currently offers a merge button despite no recorded approval. | Move repository into a GitHub Team/Enterprise organization with effective protection, or obtain an equivalent supported protected private-repository plan and verify an unapproved PR cannot merge. Do not merge meanwhile. |
 | P03 | P1 | Owner attests manual Tech Lead/Security/QA approval, but no attributable review record is present. | Attach reviewer identity, date, scope and outcome to the phase gate; owner attestation alone is not an independent audit record. |
 | P04 | P2 | No persistent staging URL; hosted staging is isolated and ephemeral. | Accept as Phase 01 smoke evidence; decide persistent host before later manual UAT. |
 | P05 | P2 | Global guard is fail-closed, but Phase 02 identity injection, object ownership at service/query scopes and admin MFA are not implemented. | Remain Phase 02 deliverables; do not expose privileged routes meanwhile. |
@@ -54,7 +55,7 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 | Approved requirements | DEC-001–006 are preserved by absence of economic endpoints; draft production contracts remain open. |
 | UI/UX | Bilingual semantic shells fit tested viewports. Product screens and interactive accessibility belong to later phases. |
 | Database/API | Draft migrations pass positive PostgreSQL 16 and local negative tests; operational OpenAPI matches tested handlers. Canonical duration contract remains unresolved. |
-| Security/authorization | Branch rule/Gitleaks established; global guard defaults to deny; logs omit arbitrary sensitive content. Real identity/object-scoped enforcement remains Phase 02. |
+| Security/authorization | Global guard defaults to deny and logs omit arbitrary sensitive content. GitHub's private-repository `main` rule is configured but unenforced; this blocks the repository gate. Real identity/object-scoped enforcement remains Phase 02. |
 | Code quality | Strict TS; deterministic Turbo task graph; runbook and ADR added. Next lint warning remains. |
 | Unit/integration | 17 actual unit tests plus live negative HTTP probe and disposable DB migration tests. Hosted current-revision integration pending. |
 | Build/deployment | Local forced build and prior hosted CI/staging pass; no permanent staging or production migration authorization. |
@@ -79,7 +80,7 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 | Structured logs, request ID, no arbitrary secret log | PASS | Logger and request-log tests. |
 | Lint/typecheck/tests/build | PASS locally | Final forced 19/19, zero cached; hosted current-revision verification pending. |
 | Audit and secret scan | PASS on prior hosted revision | Zero high/critical local audit; full-history Gitleaks succeeded on prior pushed source. |
-| Protected `main` | PASS | Rule 85006403 read back after creation. |
+| Protected `main` | FAIL | Rule configured, but GitHub [settings](https://github.com/hikmareta/galung-web/settings/branches) explicitly state it is not enforced on this private repository; [screenshot](branch-protection-private-unenforced.png). |
 | Fresh clone install/boot | PASS on prior hosted revision | Clean hosted checkout/install/app start; current revision hosted check pending. |
 | Isolated staging/health | PASS on prior hosted revision | PostgreSQL 16/Redis and four probes; current revision hosted check pending. |
 | Bilingual accessible foundation shell | PASS limited scope | Source and viewport review; no interactive controls. |
@@ -87,4 +88,4 @@ The Phase 00 canonical manifest remains `CANDIDATE / NOT FROZEN`. Its fixed 30/3
 
 ## Gate recommendation
 
-**REQUIRES CORRECTIONS** until the current source has green hosted checks on a protected pull request and an attributable review record. Phase 00 contract freeze remains an independent blocker for production and any feature relying on its unresolved terms. No Phase 02 implementation has started. Product Owner must explicitly approve the Phase 01 gate before Phase 02 begins.
+**BLOCKED** until private-repository `main` protection is enforceable and verified, current-source hosted checks pass, and an attributable review record is supplied. Phase 00 contract freeze remains an independent blocker for production and any feature relying on its unresolved terms. No Phase 02 implementation has started. Product Owner must explicitly approve the Phase 01 gate before Phase 02 begins.
