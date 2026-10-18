@@ -124,3 +124,7 @@ Use `README.md` for local boot. Check `/`, `/health` on web/admin and API `/api/
 ## Subsequent Phase 01 handoff update
 
 An operational OpenAPI file now documents health routes separately from the Phase 00 commercial draft. The migration runner rejects production, requires staging opt-in and a dedicated migration URL, and serializes runs with an advisory lock. An ephemeral PostgreSQL 16/Redis staging workflow builds and probes the apps; hosted execution is still pending. GitHub repository `hikmareta/galung-web` was verified public and empty. A local initial commit was prepared, but automatic approval review rejected publication of its 127-file documentation/code payload to that public repository without explicit Product Owner consent. No GitHub push or branch protection occurred.
+
+## Hosted verification update — 2026-10-18
+
+The repository is now private and the Phase 01 source was pushed. On commit `f384630`, [hosted CI](https://github.com/hikmareta/galung-web/actions/runs/39134544981) and [ephemeral staging](https://github.com/hikmareta/galung-web/actions/runs/39134558134) both completed successfully. CI includes full-history Gitleaks. Staging applied the draft migrations on PostgreSQL 16 and passed four health probes. Branch protection and rulesets remain **BLOCKED** because GitHub returned a plan-related 403 for this private repository; no Phase 01 approval is inferred.
