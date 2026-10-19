@@ -2,6 +2,8 @@
 
 **Priority:** P0 | **Planning effort:** 2–3 weeks | **Dependencies:** Foundation + identity ADR
 
+**Gate amendment selected 2026-10-18 (ODL-007):** The Product Owner selected an identity-only path. Phase 02 implementation still requires explicit Phase 01 exit approval and a versioned identity ADR/SQL/OpenAPI package reviewed by Security, Tech Lead and QA. Full commercial Gate A remains open; no commercial, payment, subscription, licensing or desktop activation implementation is authorized by this selection.
+
 ## Ready-to-paste AI Developer implementation prompt
 
 ```text
@@ -11,7 +13,7 @@ OBJECTIVE: Identity, RBAC & Account Security.
 
 IMPLEMENTATION BRIEF: Implement rate-limited identity endpoints, secure cookie/session and CSRF policy, role permissions, session revocation, user profile, terms acceptance and owner-scoped queries.
 
-PREREQUISITES: Foundation + identity ADR. If a prerequisite is missing, create an actionable report and only perform safe independent scaffolding; do not bypass required finance/security approvals.
+PREREQUISITES: Explicit Phase 01 foundation exit approval plus reviewed, versioned identity ADR/SQL/OpenAPI contract under ODL-007. Full commercial Gate A remains open and all non-identity functionality stays gated. If a prerequisite is missing, create an actionable report and only perform safe independent scaffolding; do not bypass required security approvals.
 
 REQUIRED DELIVERABLES: Register/login/logout, email verification, password reset, admin MFA, sessions, role enforcement, audit.
 

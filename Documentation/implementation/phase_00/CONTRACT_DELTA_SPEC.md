@@ -24,7 +24,7 @@
 
 **OpenAPI delta proposal:** `LicenseRevision` schema with `licenseId`, `revision`, `sourceOrderId`, `issuedAt`, `entitlementReadyAt`, `policyVersionId`, `status` and no raw secrets. `Issuance` response names logical license and revision and distinguishes `pending`, `failed`, `issued`. `GET /me/subscriptions/{id}` includes authoritative current period, paid/grace exclusive ends and pending renewal state. `POST /admin/license-issuance/{id}/issue` returns canonical revision for identical idempotency key; duplicate conflicting issue returns `409`. Align all UI status paths with frozen OpenAPI names.
 
-**Verification:** SUB-002–005/010–014, LIC-009/014/017, LIC-REN-001–003; clock-controlled leap/month-end and concurrent issuance tests. Migration rollback: retain additive tables and old columns; forward-fix if historic issuance linkage cannot be proven.
+**Verification:** SUB-002–005/010–014, LIC-009/014/017, LIC-REN-001–003; clock-controlled fixed 720/8,760-hour leap/month-end/DST and concurrent issuance tests. Migration rollback: retain additive tables and old columns; forward-fix if historic issuance linkage cannot be proven.
 
 ## D-04 — Device enrollment, refresh, signed grant and keys (CR-02–07; ALIGN-02/03/10/12)
 

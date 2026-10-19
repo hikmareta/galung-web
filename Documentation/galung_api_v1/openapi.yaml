@@ -2,11 +2,11 @@
 openapi: 3.1.0
 info:
   title: Galung.id Platform API
-  version: 1.1.0-draft.1
+  version: 1.1.0-draft.2
   description: Contract for Galung Basic/Pro MVP, manual bank transfer only. Draft
     for engineering review; no payment gateway. JSON is camelCase while PostgreSQL
-    is snake_case. Phase 00 reconciliation draft; commercial values and protocol interoperability
-    remain unapproved.
+    is snake_case. Phase 00 reconciliation draft; terms are fixed 30 or 365 elapsed
+    UTC days. Commercial values and protocol interoperability remain unapproved.
 servers:
 - url: https://api.galung.id/api/v1
   description: Production (planned)
@@ -3168,16 +3168,16 @@ paths:
             schema:
               type: object
               required:
-              - billingMonths
+              - termDays
               - currency
               - amountMinor
               - effectiveFrom
               properties:
-                billingMonths:
+                termDays:
                   type: integer
                   enum:
-                  - 1
-                  - 12
+                  - 30
+                  - 365
                 currency:
                   type: string
                 amountMinor:
@@ -4434,17 +4434,17 @@ components:
       type: object
       required:
       - id
-      - billingMonths
+      - termDays
       - amount
       properties:
         id:
           type: string
           format: uuid
-        billingMonths:
+        termDays:
           type: integer
           enum:
-          - 1
-          - 12
+          - 30
+          - 365
         amount:
           "$ref": "#/components/schemas/Money"
         effectiveFrom:

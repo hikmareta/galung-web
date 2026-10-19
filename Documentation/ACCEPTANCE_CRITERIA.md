@@ -6,7 +6,7 @@
 
 - Every scenario must have automated unit/integration/E2E coverage where practical, with manual QA for accessibility, bank reconciliation and desktop performance.
 - Test against isolated staging with synthetic users, fake keys, mock bank-credit records and bank statement fixtures; never fabricate production approvals.
-- Use clock-controlled tests for UTC/calendar arithmetic, grace 72 hours and offline 14 days.
+- Use clock-controlled tests for UTC elapsed-time arithmetic, grace 72 hours and offline 14 days.
 - Each test records build, environment, execution date, owner, evidence, pass/fail and linked requirement ID.
 - `P0`: failing test blocks launch. `P1`: can be separately scheduled after documented acceptance.
 
@@ -81,7 +81,7 @@
 | SUB-002 | P0 | Payment approved, license pending | Subscription not falsely shown fully ready |
 | SUB-003 | P0 | License issued after approval | Correct activation timestamp and period |
 | SUB-004 | P0 | Early renewal | Period extends from existing paid_end |
-| SUB-005 | P0 | Calendar month renewal around Jan 31/leap year | Documented calendar math, no 30-day shortcut |
+| SUB-005 | P0 | Fixed term around Jan 31/leap year/DST | Monthly paid end is exactly start + 720 elapsed hours; annual paid end is exactly start + 8,760 elapsed hours |
 | SUB-006 | P0 | H-14/H-7/H-3 reminders | Deduplicated expected messages |
 | SUB-007 | P0 | Renewal invoice created | No auto-debit or automatic extension |
 | SUB-010 | P0 | Paid end reached | Exactly 72-hour grace window opened |

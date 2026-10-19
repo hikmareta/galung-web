@@ -7,7 +7,7 @@
 
 ## 1. Product decisions frozen for v1
 
-- Galung Basic / Pro only: one- and twelve-calendar-month subscription options. No live Song Library Premium or institutional purchase APIs in MVP.
+- Galung Basic / Pro only: fixed 30-day and 365-day subscription options. No live Song Library Premium or institutional purchase APIs in MVP.
 - Per-plan device/concurrent-session limits from **versioned** plan policy. Never assume a fixed global limit.
 - Online-refreshed **offline token <= 336 hours (14 days)**; clamp to legally effective entitlement boundary (paid end + 72h grace if access permitted). No 14-day override of subscription expiry.
 - Grace window is **72 hours** after paid term. `graceEndAt = paidEndAt + 72 hours`.
@@ -21,7 +21,7 @@
 - Request/response fields use **camelCase**; PostgreSQL fields use **snake_case**. Mapping belongs to domain layer.
 - JSON content type `application/json`, UTF-8. File binary uploads use short-lived object-store signed PUT URL, followed by server verification; the API never treats an upload URL as bank payment evidence.
 - Monetary fields use `{ "amountMinor": 2490000, "currency": "IDR" }`; no float calculations. Currency exponent is **currency-specific configured metadata**, not a universal two-decimal assumption.
-- All timestamps UTC ISO-8601, server authoritative. Time-zone identity preserved for billing calendar operations. Billing `1` or `12` calendar months, not a fixed number of days.
+- All timestamps UTC ISO-8601, server authoritative. Time-zone identity is used for display only. Billing `termDays` is 30 or 365 elapsed UTC days (720 or 8,760 hours).
 - Identifiers UUID (public, unguessable, subject to ownership checks), and human-readable `orderNumber` / `invoiceNumber`. URLs only contain IDs, never secrets.
 - Collection endpoints support cursor/limit (normalize across operations during implementation). Default 20, maximum 100; stable descending order and opaque cursor.
 - API contract is versioned under `/v1`. Backward-compatible optional response fields may be added; breaking schema or semantics requires new version.

@@ -1,28 +1,43 @@
 -- Synthetic constraint checks for Phase 00 draft, run only in an isolated DB
--- after 001_core_schema.sql and 003_phase00_contract_delta.sql.
+-- after migrations 001, 003 and 004.
 BEGIN;
 SET search_path TO galung, public;
 DO $$
 DECLARE
  u1 uuid; u2 uuid; prod uuid; plan uuid; acct uuid; change_id uuid;
  sub uuid; ord1 uuid; ord2 uuid; t timestamptz := now();
+ jan_start timestamptz := timestamptz '2028-01-31 23:00:00+00';
 BEGIN
+ SET LOCAL TIME ZONE 'America/New_York';
+ IF jan_start + 720 * interval '1 hour' <> timestamptz '2028-03-01 23:00:00+00' THEN
+  RAISE EXCEPTION 'monthly fixed UTC term changed across February/DST';
+ END IF;
+ IF timestamptz '2024-02-29 12:00:00+00' + 8760 * interval '1 hour' <> timestamptz '2025-02-28 12:00:00+00' THEN
+  RAISE EXCEPTION 'annual fixed UTC term changed across leap day';
+ END IF;
  INSERT INTO users(email) VALUES ('phase00-a@example.invalid') RETURNING id INTO u1;
  INSERT INTO users(email) VALUES ('phase00-b@example.invalid') RETURNING id INTO u2;
  INSERT INTO products(code,title) VALUES ('PHASE00_SYNTHETIC','Synthetic') RETURNING id INTO prod;
  INSERT INTO plans(product_id,code,title) VALUES (prod,'PHASE00_TEST','Synthetic') RETURNING id INTO plan;
 
- INSERT INTO prices(plan_id,billing_months,currency_code,amount_minor,version,starts_at,status)
- VALUES (plan,1,'IDR',100,1,t,'active');
+ INSERT INTO prices(plan_id,term_days,currency_code,amount_minor,version,starts_at,status)
+ VALUES (plan,30,'IDR',100,1,t,'active');
  BEGIN
-  INSERT INTO prices(plan_id,billing_months,currency_code,amount_minor,version,starts_at,status)
-  VALUES (plan,1,'IDR',200,2,t+interval '1 day','active');
+  INSERT INTO prices(plan_id,term_days,currency_code,amount_minor,version,starts_at,status)
+  VALUES (plan,30,'IDR',200,2,t+interval '1 day','active');
   RAISE EXCEPTION 'overlapping active prices were accepted';
  EXCEPTION WHEN exclusion_violation THEN NULL;
  END;
 
+ BEGIN
+  INSERT INTO prices(plan_id,term_days,currency_code,amount_minor,version,starts_at,status)
+  VALUES (plan,31,'IDR',100,3,t,'draft');
+  RAISE EXCEPTION 'unsupported term length was accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+
  INSERT INTO plan_policy_versions(plan_id,version,max_devices,max_concurrent_sessions,valid_from,published_at)
- VALUES (plan,1,1,1,t,t);
+ VALUES (plan,30,1,1,t,t);
  BEGIN
   INSERT INTO plan_policy_versions(plan_id,version,max_devices,max_concurrent_sessions,valid_from,published_at)
   VALUES (plan,2,2,1,t+interval '1 day',t);
@@ -59,13 +74,20 @@ BEGIN
                     invoice_currency,subtotal_minor,total_minor,due_at)
  VALUES ('PHASE00-2',u1,'renewal','Synthetic','phase00-a@example.invalid','ID','IDR',100,100,t+interval '7 days')
  RETURNING id INTO ord2;
- INSERT INTO subscription_periods(subscription_id,source_order_id,billing_months,payment_approved_at,
+ INSERT INTO subscription_periods(subscription_id,source_order_id,term_days,payment_approved_at,
                                   entitlement_ready_at,start_at,paid_end_at,grace_end_at)
- VALUES (sub,ord1,1,t,t,t,t+interval '30 days',t+interval '33 days');
+ VALUES (sub,ord1,30,t,t,t,t+interval '720 hours',t+interval '792 hours');
  BEGIN
-  INSERT INTO subscription_periods(subscription_id,source_order_id,billing_months,payment_approved_at,
+  INSERT INTO subscription_periods(subscription_id,source_order_id,term_days,payment_approved_at,
                                     entitlement_ready_at,start_at,paid_end_at,grace_end_at)
-  VALUES (sub,ord2,1,t,t,t+interval '20 days',t+interval '50 days',t+interval '53 days');
+  VALUES (sub,ord2,30,t,t,t+interval '720 hours',t+interval '1441 hours',t+interval '1513 hours');
+  RAISE EXCEPTION 'non-fixed paid duration was accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+ BEGIN
+  INSERT INTO subscription_periods(subscription_id,source_order_id,term_days,payment_approved_at,
+                                    entitlement_ready_at,start_at,paid_end_at,grace_end_at)
+  VALUES (sub,ord2,30,t,t,t+interval '480 hours',t+interval '1200 hours',t+interval '1272 hours');
   RAISE EXCEPTION 'overlapping paid periods were accepted';
  EXCEPTION WHEN exclusion_violation THEN NULL;
  END;

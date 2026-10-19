@@ -1,3 +1,5 @@
+> **2026-10-18 duration addendum:** The Product Owner selected option A (ODL-006). ADR-10, candidate migration 004, OpenAPI 1.1.0-draft.2 and clock/SQL tests now express fixed 720/8,760-hour terms; executed evidence is in `DURATION_RECONCILIATION_EVIDENCE.md`. This closes the identified duration *wording/shape* conflict in the candidate package. Gate A remains **BLOCKED** by financial/legal values, cross-functional freeze and other open findings. Historical assessment below is retained as the pre-decision snapshot.
+
 # Phase 00 Acceptance Report — Aligned Draft Review
 
 **Date:** 2026-10-18, Asia/Jakarta  

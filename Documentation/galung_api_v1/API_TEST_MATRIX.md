@@ -40,7 +40,7 @@
 ## Testing layers
 
 - **Contract:** parse and lint OpenAPI; validate each example and request body; use contract tests against staging.
-- **Unit:** money/currency arithmetic, calendar-month renewals, grace/offline boundary calculations, roles, input validation.
+- **Unit:** money/currency arithmetic, fixed 720/8,760-hour renewals across month-end, leap dates and DST, grace/offline boundary calculations, roles, input validation.
 - **Integration:** actual PostgreSQL transactions, row locks, constraints, idempotency and outbox persistence.
 - **End-to-end:** real browser checkout, manual finance approval with **test bank credits** in isolated staging, staff license issuance, Windows desktop activation, offline boundary simulation.
 - **Security:** session/CSRF, privilege escalation, IDOR, secret leakage, upload malware, concurrency, replay, forged signed token, expired/revoked credentials.

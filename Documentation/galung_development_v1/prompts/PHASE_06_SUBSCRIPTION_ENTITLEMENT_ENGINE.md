@@ -15,7 +15,7 @@ PREREQUISITES: Approved payment ledger + plan policy. If a prerequisite is missi
 
 REQUIRED DELIVERABLES: Subscription periods, renewals, 72h grace, entitlement-ready start, reminder events, finance-safe states.
 
-DEFINITION OF COMPLETE: Clock boundary tests incl DST/calendar month and 72h; failed issuance never burns customer term; no double renewal from retry.
+DEFINITION OF COMPLETE: Clock boundary tests incl DST, month-end, leap dates, fixed 720/8,760h and 72h; failed issuance never burns customer term; no double renewal from retry.
 
 PROCESS:
 1. Produce a task checklist and map to named requirement IDs, DEC-001..006 and affected contracts. Identify missing company-approved plan prices, feature entitlements, device limits, bank details, FX/fee/refund rules; never invent values.
@@ -32,7 +32,7 @@ NON-NEGOTIABLE: no third-party payment integration; uploaded payment proof never
 
 - **Implementation:** Implement start when finance-approved and entitlement-ready, on-time extension from existing period end, post-expiry from newly ready time, temporal locks and queue-driven reminders.
 - **Artifacts:** Subscription periods, renewals, 72h grace, entitlement-ready start, reminder events, finance-safe states
-- **Completion gate:** Clock boundary tests incl DST/calendar month and 72h; failed issuance never burns customer term; no double renewal from retry.
+- **Completion gate:** Clock boundary tests incl DST, month-end, leap dates, fixed 720/8,760h and 72h; failed issuance never burns customer term; no double renewal from retry.
 - **Reviewers:** Product Owner, Technical Lead, QA; Finance for phases 00/03/04/05/10/12; Security for 00/01/02/07/08/11/12; Windows Lead for 07/08/09/11/12.
 
 ## Minimum acceptance tests
