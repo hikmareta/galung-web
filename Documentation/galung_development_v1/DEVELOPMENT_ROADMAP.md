@@ -67,6 +67,7 @@
 - **Inputs:** Approved Phase 01 foundation exit + reviewed and versioned identity ADR/SQL/OpenAPI contract under ODL-007. Full commercial Gate A remains required before implementing price, bank, checkout, payment, subscription, entitlement, licensing or desktop activation behavior.
 - **Outputs:** Register/login/logout, email verification, password reset, admin MFA, sessions, role enforcement, audit.
 - **Gate/exit:** Cross-tenant/IDOR tests deny access; admin MFA enforced; tokens and reset links cannot be replayed; login and recovery E2E pass.
+- **2026-10-20 exit decision (ODL-009):** Closed for development handoff by the Product Owner after delegated Tech Lead/Security/QA approval and passing hosted checks. Final Legal content and official SMTP delivery remain launch conditions; public registration and real-user recovery stay disabled until verified. Phase 03 work is reserved for a separate session. Full commercial Gate A and production migration remain gated.
 - **Priority:** P0; **estimate:** 2–3 weeks.
 
 ### Phase 03 — Catalog, Pricing, Bank Configuration & CMS

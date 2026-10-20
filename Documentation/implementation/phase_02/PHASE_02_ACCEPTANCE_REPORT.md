@@ -1,6 +1,6 @@
 # Phase 02 — Identity, RBAC & Account Security — acceptance report
 
-Date: 2026-10-20. **Gate verdict: BLOCKED for exit and deployment.** PostgreSQL 16, Redis, browser automation, and hosted CI checks passed. Approved Legal content, official SMTP configuration, and independent Security/Tech Lead/QA review remain outstanding. No Phase 03 work was started.
+Date: 2026-10-20. **Gate verdict: CLOSED for development handoff under ODL-009; NOT READY for public launch.** PostgreSQL 16, Redis, browser automation, and hosted CI checks passed. The Product Owner confirmed that the Tech Lead's approval represents Security and QA as well, and explicitly closed Phase 02 with two launch conditions outstanding: approved Legal content and official SMTP. No Phase 03 work was started; that phase will be developed in a separate session.
 
 ## Scope and contracts
 
@@ -34,11 +34,15 @@ Legal review drafts `DRAFT_TERMS_OF_USE_ID.md`, `DRAFT_PRIVACY_NOTICE_ID.md`, an
 
 Initial CI attempts uncovered missing synthetic outbox encryption config and a verifier cleanup-order error; both were fixed before the successful run. Browser testing exposed and led to fixes for registration form submission, 320px horizontal overflow, logout failure handling, missing admin auth security headers, and HTML titles. Earlier failing attempts are not counted as passes.
 
-## Review and remaining gate items
+## Review, phase exit, and launch conditions
 
-[Draft PR #5](https://github.com/hikmareta/galung-web/pull/5) requests independent review. At this report revision, **no Security, Tech Lead, or QA approval is recorded**. Phase 01 [PR #4](https://github.com/hikmareta/galung-web/pull/4) is still open, so default-branch integration depends on its disposition.
+[PR #5](https://github.com/hikmareta/galung-web/pull/5) received an `APPROVED` review from `dhikandhika` on commit `a4c9605` at 2026-10-20 07:35 UTC and was merged into `codex/phase-01-owner-exit`. The Product Owner subsequently confirmed in this task that this Tech Lead approval also represents Security and QA. This is **one delegated approval covering three review roles**, not three separate GitHub approvals. Phase 01 [PR #4](https://github.com/hikmareta/galung-web/pull/4) is still open, so default-branch integration depends on its disposition.
 
-1. Obtain Legal-approved published Terms and Privacy versions/URLs and official SMTP sender/service. Validate actual bilingual email delivery and links. The Product Owner deferred these decisions until the end.
-2. Obtain Security, Tech Lead, and QA review of SQL 006, OpenAPI v2, key custody/rotation, least-privilege grants, deployment configuration, and browser/accessibility evidence. Manual assistive-technology checks remain for QA. Resolve findings and obtain Product Owner Phase 02 gate approval before Phase 03.
+The Product Owner explicitly approved Phase 02 development exit on 2026-10-20, with final Legal and SMTP decisions deferred until before public launch. This closes the phase's development gate only. The two outstanding launch conditions are:
 
-The draft migration revokes legacy sessions lacking new policy fields. For a failed staging rollout, disable `IDENTITY_ENABLED`, stop delivery, and revert the application release while retaining migration and audit history. Do not apply draft migrations to production until contract and migration approval. Automated evidence cannot establish complete accessibility, SMTP delivery, or independent security approval; the phase is not closed.
+1. Obtain Legal-approved Terms and Privacy versions/URLs; publish the approved content and verify versioned consent before enabling public registration.
+2. Select and configure the official SMTP service and sender; validate actual bilingual verification/reset email delivery and links before enabling public registration or recovery for real users.
+
+Manual assistive-technology checks and any resulting defects remain release QA work. Full commercial Gate A, production migration, and affected later feature gates remain open. Phase 03 has its own inputs and authorization; this decision does not approve commercial values or start Phase 03.
+
+The draft migration revokes legacy sessions lacking new policy fields. For a failed staging rollout, disable `IDENTITY_ENABLED`, stop delivery, and revert the application release while retaining migration and audit history. Do not apply draft migrations to production until the remaining release gates are satisfied. Automated evidence cannot establish complete accessibility or SMTP delivery; public launch remains blocked by the two conditions above.
