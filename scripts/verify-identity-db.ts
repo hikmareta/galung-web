@@ -47,6 +47,7 @@ async function main() {
       ]);
       if (results.filter(Boolean).length !== 1) throw new Error(`Reset race consumed ${results.filter(Boolean).length} times`);
       await client.query('DELETE FROM galung.audit_logs WHERE actor_id=$1', [raceUser.rows[0].id]);
+      await client.query('DELETE FROM galung.identity_delivery_outbox WHERE user_id=$1', [raceUser.rows[0].id]);
       await client.query('DELETE FROM galung.auth_challenges WHERE user_id=$1', [raceUser.rows[0].id]);
       await client.query('DELETE FROM galung.users WHERE id=$1', [raceUser.rows[0].id]);
     } finally { await (Reflect.get(store, 'pool') as { end: () => Promise<void> }).end(); }
