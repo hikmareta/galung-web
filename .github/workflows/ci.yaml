@@ -48,9 +48,11 @@ jobs:
       - run: pnpm test
       - name: Verify Redis identity rate limiting
         run: pnpm --filter @galung/api exec vitest run test/identity-rate-redis.test.ts
+      - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:browser
-      - run: pnpm build
+      - name: Verify integrated identity browser journey
+        run: pnpm test:browser:integration
       - run: pnpm audit --audit-level high
   secrets:
     runs-on: ubuntu-latest
