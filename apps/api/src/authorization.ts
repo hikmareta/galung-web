@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Inject, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { can, type Principal } from '@galung/authz';
 
@@ -11,7 +11,7 @@ export const PublicRoute = () => SetMetadata(PUBLIC, true);
 // and enforce record ownership at the query/service boundary.
 @Injectable()
 export class PermissionGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
     if (this.reflector.getAllAndOverride<boolean>(PUBLIC, [context.getHandler(), context.getClass()])) return true;
     const permission = this.reflector.getAllAndOverride<string>(PERMISSION, [context.getHandler(), context.getClass()]);

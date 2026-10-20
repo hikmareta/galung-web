@@ -1,0 +1,3072 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Galung Phase 02 identity implementation contract",
+    "version": "0.2.0-review",
+    "description": "Identity-only review revision. Reconciles ODL-007 overlay with canonical draft; requires Security, Tech Lead and QA review before freeze. No commercial API is promoted."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "customerCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-galung_customer"
+      },
+      "adminCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-galung_admin"
+      },
+      "csrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-Token"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "requestId": {
+            "type": "string"
+          }
+        }
+      },
+      "Money": {
+        "type": "object",
+        "required": [
+          "amountMinor",
+          "currency"
+        ],
+        "properties": {
+          "amountMinor": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          }
+        }
+      },
+      "Plan": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "title",
+          "billingOptions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "BASIC",
+              "PRO"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "features": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "maxDevices": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "offlineMaxHours": {
+            "type": "integer",
+            "maximum": 336
+          },
+          "graceHours": {
+            "type": "integer",
+            "enum": [
+              72
+            ]
+          },
+          "billingOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Price"
+            }
+          }
+        }
+      },
+      "Price": {
+        "type": "object",
+        "required": [
+          "id",
+          "termDays",
+          "amount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "termDays": {
+            "type": "integer",
+            "enum": [
+              30,
+              365
+            ]
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderCreate": {
+        "type": "object",
+        "required": [
+          "planId",
+          "priceId",
+          "billing",
+          "acceptedTermsVersion",
+          "privacyNoticeVersion"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "promotionCode": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "billing": {
+            "$ref": "#/components/schemas/Billing"
+          },
+          "acceptedTermsVersion": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Must match server-published text version and logged content hash."
+          },
+          "relatedSubscriptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "privacyNoticeVersion": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      },
+      "Billing": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "countryCode"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "address": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "required": [
+          "id",
+          "orderNumber",
+          "status",
+          "total",
+          "dueAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "awaiting_payment",
+              "proof_submitted",
+              "under_review",
+              "approved",
+              "cancelled",
+              "expired",
+              "fulfilled"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "new",
+              "renewal",
+              "upgrade",
+              "adjustment"
+            ]
+          },
+          "total": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentSummary": {
+            "$ref": "#/components/schemas/PaymentSummary"
+          },
+          "licenseIssuanceStatus": {
+            "type": "string",
+            "enum": [
+              "not_requested",
+              "pending",
+              "processing",
+              "issued",
+              "failed"
+            ]
+          }
+        }
+      },
+      "PaymentSummary": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_submitted",
+              "submitted",
+              "under_review",
+              "awaiting_funds",
+              "amount_mismatch",
+              "needs_revision",
+              "rejected",
+              "approved"
+            ]
+          },
+          "latestSubmissionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lastUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Invoice": {
+        "type": "object",
+        "required": [
+          "id",
+          "invoiceNumber",
+          "orderId",
+          "total",
+          "bankInstructions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "total": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "bankInstructions": {
+            "$ref": "#/components/schemas/BankInstructions"
+          },
+          "pdfDownloadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Short-lived signed URL or controlled download endpoint."
+          }
+        }
+      },
+      "BankInstructions": {
+        "type": "object",
+        "required": [
+          "beneficiaryName",
+          "bankName",
+          "transferReference",
+          "receiveCurrency"
+        ],
+        "properties": {
+          "beneficiaryName": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": "string"
+          },
+          "bankCountry": {
+            "type": "string"
+          },
+          "maskedAccountNumber": {
+            "type": "string"
+          },
+          "accountNumber": {
+            "type": "string",
+            "description": "Sensitive; only disclosed to authenticated owner via invoice, no logs or analytics."
+          },
+          "iban": {
+            "type": "string"
+          },
+          "swiftBic": {
+            "type": "string"
+          },
+          "receiveCurrency": {
+            "type": "string"
+          },
+          "transferReference": {
+            "type": "string"
+          },
+          "feePolicy": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "AssetUploadRequest": {
+        "type": "object",
+        "required": [
+          "filename",
+          "contentType",
+          "sizeBytes",
+          "sha256Hex"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "application/pdf"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10485760
+          },
+          "sha256Hex": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          }
+        }
+      },
+      "UploadIntent": {
+        "type": "object",
+        "required": [
+          "assetId",
+          "uploadUrl",
+          "expiresAt"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Pre-signed URL host outside API, never log; whitelisted upload destination."
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "requiredHeaders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProofSubmit": {
+        "type": "object",
+        "required": [
+          "assetId",
+          "senderName",
+          "sentAmount",
+          "sentAt"
+        ],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "senderName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "senderBank": {
+            "type": "string"
+          },
+          "transferReference": {
+            "type": "string"
+          },
+          "sentAmount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "customerNotes": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "ProofSubmission": {
+        "type": "object",
+        "required": [
+          "id",
+          "orderId",
+          "status",
+          "revisionNumber"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "submitted",
+              "under_review",
+              "awaiting_funds",
+              "amount_mismatch",
+              "needs_revision",
+              "rejected",
+              "approved"
+            ]
+          },
+          "revisionNumber": {
+            "type": "integer"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 2000
+          },
+          "bankCreditId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required only for approval; must represent verified bank funds."
+          },
+          "reviewNote": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "BankCreditInput": {
+        "type": "object",
+        "required": [
+          "bankAccountId",
+          "bankReference",
+          "received",
+          "receivedAt"
+        ],
+        "properties": {
+          "bankAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bankReference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "received": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "required": [
+          "id",
+          "planCode",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planCode": {
+            "type": "string",
+            "enum": [
+              "BASIC",
+              "PRO"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_activation",
+              "active",
+              "grace",
+              "expired",
+              "cancelled",
+              "suspended",
+              "revoked"
+            ]
+          },
+          "paidEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "graceEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentPeriodStartAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "License": {
+        "type": "object",
+        "required": [
+          "id",
+          "publicId",
+          "status",
+          "maxDevices"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publicId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "issued",
+              "active",
+              "expired",
+              "suspended",
+              "revoked"
+            ]
+          },
+          "planCode": {
+            "type": "string",
+            "enum": [
+              "BASIC",
+              "PRO"
+            ]
+          },
+          "maxDevices": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "activeDeviceCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "offlineMaxHours": {
+            "type": "integer",
+            "maximum": 336
+          },
+          "entitlementEndAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "features": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "Device": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "deactivated"
+            ]
+          },
+          "lastValidatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "offlineValidUntil": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ActivationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "licensePublicId",
+          "activationSecret",
+          "challengeId",
+          "devicePublicKeyJwk",
+          "deviceProof",
+          "clientVersion"
+        ],
+        "properties": {
+          "licensePublicId": {
+            "type": "string"
+          },
+          "activationSecret": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "devicePublicKeyJwk": {
+            "$ref": "#/components/schemas/DevicePublicKeyJwk"
+          },
+          "deviceProof": {
+            "type": "string",
+            "description": "Signature over the approved canonical request, challenge and body hash."
+          },
+          "deviceLabel": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "clientVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "activationId",
+          "challengeId",
+          "deviceProof",
+          "clientVersion"
+        ],
+        "properties": {
+          "activationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deviceProof": {
+            "type": "string"
+          },
+          "clientVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "SignedEntitlement": {
+        "type": "object",
+        "required": [
+          "activationId",
+          "signedToken",
+          "refreshCredential",
+          "issuedAt",
+          "offlineValidUntil",
+          "serverTime",
+          "licenseRevision"
+        ],
+        "properties": {
+          "activationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "signedToken": {
+            "type": "string",
+            "description": "Compact JWS, device-bound and readable; no secret claims."
+          },
+          "refreshCredential": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Rotated opaque secret returned once; exact retry behavior in licensing protocol."
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "offlineValidUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "serverTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "licenseRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "nextValidationRecommendedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Issuance": {
+        "type": "object",
+        "required": [
+          "id",
+          "orderId",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "processing",
+              "issued",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "licenseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "licenseRevision": {
+            "$ref": "#/components/schemas/LicenseRevision"
+          }
+        }
+      },
+      "Page": {
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "locale",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "in_review",
+              "published",
+              "archived"
+            ]
+          },
+          "body": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "seo": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "PageEdit": {
+        "type": "object",
+        "required": [
+          "title",
+          "body"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "seo": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "expectedRevision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "Promotion": {
+        "type": "object",
+        "required": [
+          "code",
+          "discountType",
+          "discountValue",
+          "startsAt",
+          "endsAt"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "discountType": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "fixed"
+            ]
+          },
+          "discountValue": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxRedemptions": {
+            "type": "integer"
+          },
+          "perUserLimit": {
+            "type": "integer"
+          },
+          "planIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "SoftwareRelease": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "platform",
+          "channel"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "windows-x64"
+            ]
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "stable",
+              "beta"
+            ]
+          },
+          "sha256Hex": {
+            "type": "string"
+          },
+          "releaseNotes": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "email",
+          "password",
+          "audience"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "admin"
+            ]
+          }
+        }
+      },
+      "Register": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "email",
+          "password",
+          "displayName",
+          "countryCode",
+          "preferredLocale",
+          "termsVersion",
+          "privacyNoticeVersion",
+          "acceptTerms",
+          "acknowledgePrivacy"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 320
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 1024,
+            "writeOnly": true
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "preferredLocale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "termsVersion": {
+            "type": "string"
+          },
+          "privacyNoticeVersion": {
+            "type": "string"
+          },
+          "acceptTerms": {
+            "const": true
+          },
+          "acknowledgePrivacy": {
+            "const": true
+          }
+        }
+      },
+      "Session": {
+        "type": "object",
+        "required": [
+          "id",
+          "audience",
+          "expiresAt",
+          "authLevel"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "admin"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authLevel": {
+            "type": "string",
+            "enum": [
+              "password",
+              "mfa"
+            ]
+          }
+        }
+      },
+      "ListMeta": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "limit": {
+            "type": "integer"
+          }
+        }
+      },
+      "CsrfResponse": {
+        "type": "object",
+        "required": [
+          "csrfToken",
+          "expiresAt"
+        ],
+        "properties": {
+          "csrfToken": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LegalAcceptance": {
+        "type": "object",
+        "required": [
+          "termsVersion",
+          "privacyNoticeVersion",
+          "acceptedAt"
+        ],
+        "properties": {
+          "termsVersion": {
+            "type": "string"
+          },
+          "privacyNoticeVersion": {
+            "type": "string"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DevicePublicKeyJwk": {
+        "type": "object",
+        "required": [
+          "kty",
+          "crv",
+          "x",
+          "y"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kty": {
+            "type": "string",
+            "const": "EC"
+          },
+          "crv": {
+            "type": "string",
+            "const": "P-256"
+          },
+          "x": {
+            "type": "string"
+          },
+          "y": {
+            "type": "string"
+          }
+        },
+        "description": "Draft P-256 device proof key; Windows interoperability approval pending."
+      },
+      "ActivationClaim": {
+        "type": "object",
+        "required": [
+          "claimId",
+          "activationSecret",
+          "expiresAt"
+        ],
+        "properties": {
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "activationSecret": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChallengeRequest": {
+        "type": "object",
+        "required": [
+          "purpose",
+          "devicePublicKeyJwk"
+        ],
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "activate",
+              "refresh",
+              "deactivate"
+            ]
+          },
+          "licensePublicId": {
+            "type": "string"
+          },
+          "activationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "devicePublicKeyJwk": {
+            "$ref": "#/components/schemas/DevicePublicKeyJwk"
+          }
+        }
+      },
+      "Challenge": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "nonce",
+          "expiresAt"
+        ],
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nonce": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OfflineEntitlementClaims": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "iss",
+          "aud",
+          "sub",
+          "jti",
+          "iat",
+          "nbf",
+          "exp",
+          "activation_id",
+          "device_key_thumbprint",
+          "product",
+          "edition",
+          "plan_policy_version",
+          "entitlements",
+          "paid_end_at",
+          "effective_entitlement_end_at",
+          "last_online_validation_at",
+          "offline_deadline_at",
+          "license_revision"
+        ],
+        "properties": {
+          "iss": {
+            "type": "string"
+          },
+          "aud": {
+            "type": "string",
+            "const": "galung-desktop"
+          },
+          "sub": {
+            "type": "string"
+          },
+          "jti": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "iat": {
+            "type": "integer"
+          },
+          "nbf": {
+            "type": "integer"
+          },
+          "exp": {
+            "type": "integer"
+          },
+          "activation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_key_thumbprint": {
+            "type": "string"
+          },
+          "product": {
+            "type": "string",
+            "const": "galung-suite"
+          },
+          "edition": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "pro"
+            ]
+          },
+          "plan_policy_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "entitlements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "paid_end_at": {
+            "type": "integer"
+          },
+          "effective_entitlement_end_at": {
+            "type": "integer"
+          },
+          "last_online_validation_at": {
+            "type": "integer"
+          },
+          "offline_deadline_at": {
+            "type": "integer"
+          },
+          "license_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "description": "Claims inside compact JWS with protected alg=EdDSA, typ=galung-offline+jwt and pinned kid. All times Unix seconds."
+      },
+      "LicenseRevision": {
+        "type": "object",
+        "required": [
+          "licenseId",
+          "revision",
+          "sourceOrderId",
+          "status"
+        ],
+        "properties": {
+          "licenseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sourceOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "issued",
+              "failed"
+            ]
+          },
+          "entitlementReadyAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "policyVersionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "BankChangeProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "beneficiaryName",
+          "bankName",
+          "accountNumber",
+          "bankCountry",
+          "supportedCurrencies",
+          "reason",
+          "expectedAccountVersion"
+        ],
+        "properties": {
+          "beneficiaryName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bankName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "accountNumber": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "iban": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "swiftBic": {
+            "type": "string"
+          },
+          "bankCountry": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "supportedCurrencies": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            }
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8
+          },
+          "expectedAccountVersion": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "BankChange": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "proposalDigest",
+          "requestedBy",
+          "requestedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected",
+              "applied"
+            ]
+          },
+          "proposalDigest": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maskedAccountNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "BankChangeApproval": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expectedProposalDigest",
+          "reason"
+        ],
+        "properties": {
+          "expectedProposalDigest": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8
+          }
+        }
+      },
+      "PaymentApprovalInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason",
+          "bankCreditId"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 2000
+          },
+          "bankCreditId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewNote": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "AssetFinalization": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sha256Hex",
+          "sizeBytes"
+        ],
+        "properties": {
+          "sha256Hex": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10485760
+          }
+        }
+      },
+      "MfaChallenge": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "code"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[0-9]{6}$"
+          }
+        }
+      },
+      "RecoveryChallenge": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "challengeId",
+          "recoveryCode"
+        ],
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recoveryCode": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "MfaPending": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "expiresInMinutes",
+          "enrollmentRequired"
+        ],
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresInMinutes": {
+            "type": "integer"
+          },
+          "enrollmentRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "preferredLocale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          }
+        }
+      },
+      "IdentityProfile": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "preferredLocale"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "displayName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "countryCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "preferredLocale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "emailVerifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "legalBillingName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "companyName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "companyRegistrationId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "IdentityProfileUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "preferredLocale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "legalBillingName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "companyName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "companyRegistrationId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "parameters": {
+      "UUID": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      },
+      "Idempotency": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        }
+      },
+      "CSRF": {
+        "name": "X-CSRF-Token",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "No valid session or challenge",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Insufficient permission, MFA or CSRF",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Stale or consumed challenge",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limited",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Invalid JSON or input",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register account",
+        "operationId": "post_auth_register",
+        "responses": {
+          "201": {
+            "description": "Verification pending; no session cookie"
+          },
+          "400": {
+            "description": "Malformed request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Account requires verified email before paid checkout. Verification event sent via outbox.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "loginIdentityOverlay",
+        "summary": "Customer login returns session; admin first factor returns pending MFA without session cookie",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Customer session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Admin MFA pending; no session cookie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaPending"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Revoke current session",
+        "operationId": "post_auth_logout",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CSRF"
+          }
+        ]
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get authenticated session",
+        "operationId": "get_auth_session",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "description": "Requires X-Galung-Audience: admin for an admin cookie; defaults to customer."
+      }
+    },
+    "/auth/email-verification/request": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Request verification email",
+        "operationId": "post_auth_email_verification_request",
+        "responses": {
+          "202": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CSRF"
+          }
+        ]
+      }
+    },
+    "/auth/email-verification/confirm": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Confirm verification token",
+        "operationId": "post_auth_email_verification_confirm",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CSRF"
+          }
+        ]
+      }
+    },
+    "/auth/password-reset/request": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Request password reset without email enumeration",
+        "operationId": "post_auth_password_reset_request",
+        "responses": {
+          "202": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Malformed request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/password-reset/confirm": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Reset password and revoke sessions",
+        "operationId": "post_auth_password_reset_confirm",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Malformed request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "newPassword"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 12
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/csrf": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get CSRF token for authenticated browser session",
+        "operationId": "get_auth_csrf",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsrfResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "description": "Returns a session-bound token; use X-Galung-Audience: admin for an admin cookie."
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Current customer identity",
+        "operationId": "get_me",
+        "responses": {
+          "200": {
+            "description": "Current owner profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation/business rule failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "updateOwnProfile",
+        "summary": "Update permitted fields of authenticated profile only",
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current owner profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "description": "Invalid profile field"
+          }
+        }
+      }
+    },
+    "/auth/mfa/enroll": {
+      "post": {
+        "operationId": "enrollAdminMfa",
+        "summary": "Begin TOTP enrollment; secret disclosed once in protected response",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "One-time TOTP enrollment secret for a valid first-factor challenge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "secret"
+                  ],
+                  "properties": {
+                    "secret": {
+                      "type": "string",
+                      "writeOnly": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "challengeId"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "challengeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mfa/enroll/confirm": {
+      "post": {
+        "operationId": "confirmAdminMfaEnrollment",
+        "summary": "Verify TOTP before activating factor",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin session and recovery codes shown once",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Session"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "recoveryCodes"
+                      ],
+                      "properties": {
+                        "recoveryCodes": {
+                          "type": "array",
+                          "minItems": 8,
+                          "maxItems": 8,
+                          "items": {
+                            "type": "string",
+                            "writeOnly": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/auth/mfa/complete": {
+      "post": {
+        "operationId": "completeLoginMfa",
+        "summary": "Complete pending admin login; issue admin cookie only after success",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin session issued after MFA"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/auth/mfa/recovery": {
+      "post": {
+        "operationId": "recoverAdminMfa",
+        "summary": "Consume one recovery code and rotate/revoke admin sessions",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin session issued after MFA"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/me/sessions": {
+      "get": {
+        "operationId": "listOwnSessions",
+        "summary": "List current user's sessions only",
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Session"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/me/sessions/{id}/revoke": {
+      "post": {
+        "operationId": "revokeOwnSession",
+        "summary": "Revoke own session only",
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Revoked"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Session not found under current owner"
+          }
+        }
+      }
+    },
+    "/me/legal-acceptances": {
+      "get": {
+        "operationId": "listOwnLegalAcceptances",
+        "summary": "Read current user legal acceptance evidence only",
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own acceptance history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LegalAcceptance"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/me/privacy-requests": {
+      "get": {
+        "operationId": "listOwnPrivacyRequests",
+        "summary": "List own data requests",
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own privacy requests"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "requestOwnPrivacyAction",
+        "summary": "Request export or deletion review; no automatic financial record erasure",
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "export",
+                      "deletion"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Pending human review; duplicate pending request returns same id"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
+  }
+}

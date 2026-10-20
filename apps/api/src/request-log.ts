@@ -6,6 +6,7 @@ import type { NextFunction, Request, Response } from 'express';
 export class RequestLogMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const requestId = randomUUID();
+    (req as Request & { requestId: string }).requestId = requestId;
     res.setHeader('X-Request-ID', requestId);
     const started = Date.now();
     res.on('finish', () => {

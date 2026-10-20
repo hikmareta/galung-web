@@ -16,6 +16,6 @@
     },
     "lint": {},
     "typecheck": {},
-    "test": {}
+    "test": { "env": ["IDENTITY_REDIS_TEST", "REDIS_URL"] }
   }
 }
