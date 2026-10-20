@@ -1,0 +1,572 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Galung identity-only contract overlay",
+    "version": "0.1.0-review",
+    "description": "ODL-007 candidate; extends commercial OpenAPI 1.1.0-draft.2 and is not deployed or frozen."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "customerCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-galung_customer"
+      },
+      "adminCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-galung_admin"
+      },
+      "csrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-Token"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error",
+          "requestId"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "requestId": {
+            "type": "string"
+          }
+        }
+      },
+      "MfaChallenge": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "code"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[0-9]{6}$"
+          }
+        }
+      },
+      "RecoveryChallenge": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "recoveryCode"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recoveryCode": {
+            "type": "string",
+            "minLength": 8
+          }
+        }
+      },
+      "Session": {
+        "type": "object",
+        "required": [
+          "id",
+          "audience",
+          "expiresAt",
+          "authLevel"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "admin"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authLevel": {
+            "type": "string",
+            "enum": [
+              "password",
+              "mfa"
+            ]
+          }
+        }
+      },
+      "MfaPending": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "preferredLocale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          }
+        }
+      },
+      "LegalAcceptance": {
+        "type": "object",
+        "required": [
+          "termsVersion",
+          "privacyNoticeVersion",
+          "acceptedAt"
+        ],
+        "properties": {
+          "termsVersion": {
+            "type": "string"
+          },
+          "privacyNoticeVersion": {
+            "type": "string"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "No valid session or challenge",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Insufficient permission, MFA or CSRF",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Stale or consumed challenge",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limited",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/mfa/complete": {
+      "post": {
+        "operationId": "completeLoginMfa",
+        "summary": "Complete pending admin login; issue admin cookie only after success",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "409": {
+              "$ref": "#/components/responses/Conflict"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/auth/mfa/recovery": {
+      "post": {
+        "operationId": "recoverAdminMfa",
+        "summary": "Consume one recovery code and rotate/revoke admin sessions",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recovered; new admin session issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "409": {
+              "$ref": "#/components/responses/Conflict"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/auth/mfa/enroll": {
+      "post": {
+        "operationId": "enrollAdminMfa",
+        "summary": "Begin TOTP enrollment; secret disclosed once in protected response",
+        "security": [
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending factor enrollment"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/auth/mfa/enroll/confirm": {
+      "post": {
+        "operationId": "confirmAdminMfaEnrollment",
+        "summary": "Verify TOTP before activating factor",
+        "security": [
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaChallenge"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Factor active"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/me/sessions": {
+      "get": {
+        "operationId": "listOwnSessions",
+        "summary": "List current user's sessions only",
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Session"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/me/sessions/{id}/revoke": {
+      "post": {
+        "operationId": "revokeOwnSession",
+        "summary": "Revoke own session only",
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Revoked"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Session not found under current owner"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "loginIdentityOverlay",
+        "summary": "Customer login returns session; admin first factor returns pending MFA without session cookie",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Customer session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Admin MFA pending; no session cookie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaPending"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/me": {
+      "patch": {
+        "operationId": "updateOwnProfile",
+        "summary": "Update permitted fields of authenticated profile only",
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated own profile"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "description": "Invalid profile field"
+          }
+        }
+      }
+    },
+    "/me/legal-acceptances": {
+      "get": {
+        "operationId": "listOwnLegalAcceptances",
+        "summary": "Read current user legal acceptance evidence only",
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own acceptance history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LegalAcceptance"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    }
+  }
+}

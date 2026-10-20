@@ -2,7 +2,7 @@
 
 Baseline: `/mnt/data/galung_database_v1/001_core_schema.sql`. The API spec is **not** evidence these changes already exist in DB. Treat mismatches as work items before migrations freeze.
 
-**Phase 00 update:** The actual repository baseline is `Documentation/database/001_core_schema.sql`. `Documentation/database/003_phase00_contract_delta.sql` and OpenAPI 1.1.0-draft.1 propose several P0 alignments, including activation claims/challenges/device keys/refresh credentials, license revisions, key registry, legal acceptance, and two-person MFA bank change. This register remains a closure checklist: a draft delta is **not** an approved, applied or tested migration. Product/Finance/Legal values and Windows/security interoperability remain open.
+**Phase 00 update:** The actual repository baseline is `Documentation/database/001_core_schema.sql`. `Documentation/database/003_phase00_contract_delta.sql` and OpenAPI 1.1.0-draft.2 propose several P0 alignments, including activation claims/challenges/device keys/refresh credentials, license revisions, key registry, legal acceptance, and two-person MFA bank change. This register remains a closure checklist: a draft delta is **not** an approved, applied or tested migration. Product/Finance/Legal values and Windows/security interoperability remain open.
 
 | ID | Area | Existing baseline | Engineering change / decision required | Severity |
 |---|---|---|---|---|

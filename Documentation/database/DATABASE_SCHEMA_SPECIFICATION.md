@@ -25,7 +25,7 @@
 - Persist all instants as `timestamptz` (UTC instants). Render with user/company timezone; store time-zone *identity* only for presentation. Subscription duration is fixed elapsed UTC time: 30 × 24 hours or 365 × 24 hours.
 - Financial amounts: signed 64-bit integer **minor currency units** with ISO-4217 currency code. Currency-specific exponent comes from versioned application currency metadata (IDR typically exponent zero in user-facing payment workflows; don't assume all currencies use 2 decimals). Immutable invoices include finalized amount snapshots. Never use float for money.
 - Prefer immutable ledger/event history and explicit reversal/correction records for approved transactions. Avoid overwriting accepted financial evidence.
-- All file bodies in private object storage, only metadata and object pointers in PostgreSQL. Installer objects are **not** subject to 5MB proof-upload cap; constrain proof assets specifically in application validation.
+- All file bodies in private object storage, only metadata and object pointers in PostgreSQL. Installer objects are **not** subject to 10 MB proof-upload cap; constrain proof assets specifically in application validation.
 - Application account uses least-privilege DB roles; migrations use separate restricted deployment credentials. Sensitive bank numbers encrypted at application/KMS layer, with redacted audit logs.
 - Database checks enforce local invariants; cross-row, cross-table, privileged transitions and role permissions require service transactions, row-level locks, explicit idempotency keys, and tests. Referential integrity alone is insufficient.
 - Publish currency-specific bank account and bank instructions only after bank verification and privileged approval. Invoice preserves immutable bank-instruction snapshot.
@@ -126,7 +126,7 @@ Serializable / appropriately locked transaction: validate published plan, billin
 
 ### 5.2 Proof submission
 
-Authorize owner; validate order eligibility, file type/actual content and proof-specific 5MB limit, malware result (`clean`) before finance preview; insert revision and payment status. Proof upload never changes subscription or license state. Customer may resubmit; old versions remain.
+Authorize owner; validate order eligibility, file type/actual content and proof-specific 10 MB limit, malware result (`clean`) before finance preview; insert revision and payment status. Proof upload never changes subscription or license state. Customer may resubmit; old versions remain.
 
 ### 5.3 Finance approval
 
@@ -159,7 +159,7 @@ In a locked transaction, enforce active devices against snapshot `max_devices`. 
 6. **State transitions:** DDL enums define possible states, not allowed transition graphs. Implement central transition services, strict role checks, append-only status/event history.
 7. **Approval immutability:** forbid UPDATE/DELETE to `payment_reviews`, `bank_credits`, `subscription_periods`, `license_events`, `audit_logs`, and historical invoices after issuance using privilege grants and/or triggers; corrections are compensating entries.
 8. **Cross-entity ownership:** assert order belongs to authenticated user; matched subscription, license and device share allowed customer ownership; FK alone does not prove same owner.
-9. **Files:** `file_assets` generic object metadata supports installer files >5MB. Proofs must be <=5MB and clean before use; installer bundles require SHA-256 and secure code signing.
+9. **Files:** `file_assets` generic object metadata supports installer files >10 MB. Proofs must be <=10 MB and clean before use; installer bundles require SHA-256 and secure code signing.
 10. **MFA and login provider:** standard OIDC/auth adapter tables are intentionally not fixed until provider selection; never design hand-made insecure password reset flows.
 11. **Audit retention:** GDPR/PDP and financial retention periods require legal approval; audit logs must redact secrets and payment document contents.
 12. **Country and currency metadata:** ISO codes should be checked against approved reference tables / service validation, not merely CHAR(2)/CHAR(3).
@@ -206,7 +206,7 @@ Account deletion requests must be balanced with lawful financial record preserva
 
 ### Phase 00 reconciliation draft, pending approval
 
-`003_phase00_contract_delta.sql` proposes legal acceptance evidence, finance/bank maker-checker structures, non-overlapping prices/policies/paid periods, license revisions, entitlement events, one-use activation claims, challenges, device keys, rotating refresh credentials, public signing-key registry and per-device token issuance. The existing `001_core_schema.sql` is preserved; additive backfill and old-column retirement require separate reviewed production migrations. The draft is paired with `galung_api_v1/openapi.yaml` 1.1.0-draft.1 and the revised licensing protocol. No real plan, currency, bank or tax values are seeded. The Product Owner approved two different MFA-verified actors for beneficiary changes; Finance/Security operational details and all other commercial values remain TBD.
+`003_phase00_contract_delta.sql` proposes legal acceptance evidence, finance/bank maker-checker structures, non-overlapping prices/policies/paid periods, license revisions, entitlement events, one-use activation claims, challenges, device keys, rotating refresh credentials, public signing-key registry and per-device token issuance. The existing `001_core_schema.sql` is preserved; additive backfill and old-column retirement require separate reviewed production migrations. The draft is paired with `galung_api_v1/openapi.yaml` 1.1.0-draft.2 and the revised licensing protocol. No real plan, currency, bank or tax values are seeded. The Product Owner approved two different MFA-verified actors for beneficiary changes; Finance/Security operational details and all other commercial values remain TBD.
 
 A database schema is accepted only when:
 

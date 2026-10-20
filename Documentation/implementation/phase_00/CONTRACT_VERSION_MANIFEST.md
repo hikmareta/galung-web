@@ -8,13 +8,13 @@
 |---|---|---|---|---|
 | Product | `Documentation/PRODUCT_REQUIREMENTS.md` | v1.0 | `cb25c6077ca50bf441985e261e41f0ac207c068405b42c9b95c20416cdd403fc` | Binding DEC-001–006; TBD values remain open |
 | Business | `Documentation/BUSINESS_RULES_AND_FLOWS.md` | v1.0 | `4a422bb4737008b07ebbef7061b701231aaab07806439a90738e52fd157fcb65` | Binding transitions; exception policies open |
-| UI/UX | `Documentation/UI_UX_SCREEN_SPECIFICATION.md` | header v1.0; roadmap says v1.1 | `5ebed869ad040b311d164c98c24cb2976740a72a818d006cad8674bfdeecff2d` | Version discrepancy to resolve |
-| Database narrative | `Documentation/database/DATABASE_SCHEMA_SPECIFICATION.md` | v1.0 draft | `c0599ce85f5eb96b3b45b29e665d11d90e955caeee24329a899bf0b28ad756d0` | Aligned draft; migration remains candidate |
+| UI/UX | `Documentation/UI_UX_SCREEN_SPECIFICATION.md` | header v1.0; roadmap says v1.1 | `24ddf6d759c405e0051b0a5f93ed7b5826339357dda5ed670ebca491439d04ed` | Version discrepancy to resolve |
+| Database narrative | `Documentation/database/DATABASE_SCHEMA_SPECIFICATION.md` | v1.0 draft | `d42622bf12ddbca26aa429e56b0b15a3f005c693123385d3577366b766b8e9df` | Aligned draft; migration remains candidate |
 | Database SQL | `Documentation/database/001_core_schema.sql` | reference DDL | `dffa9eec52d8cf4a35acb85855b008d34f15740c77259f1892fc8f383b414eee` | Not migration-tested or approved |
-| API narrative | `Documentation/galung_api_v1/API_SPECIFICATION.md` | v1.0 draft | `b4249bc858c0fab2a958e58218a8e18b766ff82d29dc955f7822d8cdf0b43d12` | Aligned draft; no handler implementation |
-| OpenAPI YAML | `Documentation/galung_api_v1/openapi.yaml` | OpenAPI 3.1.0; API 1.1.0-draft.2 | `a2ea8179814d4e7378bcba1e7608249849ab1498d8c6259ac50ecff555582876` | Aligned draft; structurally verified |
-| OpenAPI JSON | `Documentation/galung_api_v1/openapi.json` | OpenAPI 3.1.0; API 1.1.0-draft.2 | `c3b7b9bf66ac8a352473e904edafef8249c599166018408ea8c74ccfc754dca0` | Generated equivalent export |
-| Licensing | `Documentation/galung_licensing_v1/LICENSING_PROTOCOL_SPECIFICATION.md` | v1.0 proposed | `96f0d1399a99d16bd81132900e3c84360f19cf0088403e7780e125ec1b940476` | Aligned draft; Windows interop pending |
+| API narrative | `Documentation/galung_api_v1/API_SPECIFICATION.md` | v1.0 draft | `2d6badeed338b775bfef68629aa7ea20f3e11d5cf511594c5abce9115c854e3b` | Aligned draft; no handler implementation |
+| OpenAPI YAML | `Documentation/galung_api_v1/openapi.yaml` | OpenAPI 3.1.0; API 1.1.0-draft.2 | `09b2825291970d7c74d4dd77576ff1d77184cdb2933524cb2ead50d81f1577d1` | Aligned draft; structurally verified |
+| OpenAPI JSON | `Documentation/galung_api_v1/openapi.json` | OpenAPI 3.1.0; API 1.1.0-draft.2 | `dfa544ea00f4d0a35d7b83a34814bbf443541915b055c5c1cf7ba3e447caf8a8` | Generated equivalent export |
+| Licensing | `Documentation/galung_licensing_v1/LICENSING_PROTOCOL_SPECIFICATION.md` | v1.0 proposed | `6a87238fff19594f09bb695a15e272ceba0e3c68c7c5c632595acf708715698c` | Aligned draft; Windows interop pending |
 
 | Database SQL delta | `Documentation/database/003_phase00_contract_delta.sql` | Phase 00 candidate | `97aa7a94ef3f8653dc4c5e11e20377b6e5a9b6160ee69ab6e547d24dd6625d33` | Additive draft; PostgreSQL 15 smoke passed previously; constraint test pending |
 

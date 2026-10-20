@@ -8,7 +8,7 @@
 ## Scope and trace
 
 - Engineering foundation: roadmap Phase 01, ADR-08 direction, NFR security/operations and DEC-001–006 constraints. `apps/web`, `apps/admin` and `apps/api` are deliberately empty foundations; no Phase 02 identity or commerce operations were added.
-- Canonical contracts: no OpenAPI handler or business schema changes. Migration runner applies unchanged `001_core_schema.sql` and unchanged Phase 00 draft `003_phase00_contract_delta.sql`, in order. `002_future_extensions.sql` is excluded. These SQL files remain review drafts and are **not** authorized for production use.
+- Canonical contracts: no OpenAPI handler or business schema changes. Migration runner applies unchanged `001_core_schema.sql`, Phase 00 draft `003_phase00_contract_delta.sql`, and `004_fixed_subscription_terms.sql`, in order. `002_future_extensions.sql` is excluded. These SQL files remain review drafts and are **not** authorized for production use.
 - Phase 00 policy conflicts remain: legal/refund/tax/retention review, financial publication data and Windows protocol review. No order, payment, subscription or license endpoint is enabled.
 
 ## Implemented
