@@ -124,6 +124,65 @@
             ]
           }
         }
+      },
+      "MfaPending": {
+        "type": "object",
+        "required": [
+          "challengeId",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "challengeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "preferredLocale": {
+            "type": "string",
+            "enum": [
+              "id-ID",
+              "en"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          }
+        }
+      },
+      "LegalAcceptance": {
+        "type": "object",
+        "required": [
+          "termsVersion",
+          "privacyNoticeVersion",
+          "acceptedAt"
+        ],
+        "properties": {
+          "termsVersion": {
+            "type": "string"
+          },
+          "privacyNoticeVersion": {
+            "type": "string"
+          },
+          "acceptedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     },
     "responses": {
@@ -398,6 +457,113 @@
           },
           "404": {
             "description": "Session not found under current owner"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "loginIdentityOverlay",
+        "summary": "Customer login returns session; admin first factor returns pending MFA without session cookie",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Customer session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Admin MFA pending; no session cookie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaPending"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/me": {
+      "patch": {
+        "operationId": "updateOwnProfile",
+        "summary": "Update permitted fields of authenticated profile only",
+        "security": [
+          {
+            "customerCookie": [],
+            "csrfToken": []
+          },
+          {
+            "adminCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated own profile"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "description": "Invalid profile field"
+          }
+        }
+      }
+    },
+    "/me/legal-acceptances": {
+      "get": {
+        "operationId": "listOwnLegalAcceptances",
+        "summary": "Read current user legal acceptance evidence only",
+        "security": [
+          {
+            "customerCookie": []
+          },
+          {
+            "adminCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Own acceptance history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LegalAcceptance"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }

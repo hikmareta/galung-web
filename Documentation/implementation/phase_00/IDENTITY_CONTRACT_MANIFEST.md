@@ -5,8 +5,8 @@
 | File | SHA-256 |
 |---|---|
 | `Documentation/implementation/phase_00/adr/ADR-01.md` | `f6fe04b834090bcc4190fab62c53e67b6afc773c35cec5ed421164e372255650` |
-| `Documentation/implementation/phase_00/IDENTITY_CONTRACT_V1_REVIEW.md` | `d464e77f8e299b84cc53021c42ff8abfbad9019baf04e8c1ef9354d376dcec50` |
+| `Documentation/implementation/phase_00/IDENTITY_CONTRACT_V1_REVIEW.md` | `208711561f9ace57ddc29dea8e98adc5518f324beaf4b24f5b8f511c511b6c72` |
 | `Documentation/database/005_identity_contract_candidate.sql` | `d8effc4f70abac4afef2d1fc6814cdf80db53b166031852f38229f4b2bee5ef2` |
-| `Documentation/galung_api_v1/identity-openapi-candidate.json` | `5e23493343e0e3f945777d44383627639b4c3f96e515c864eb2a5b3281fea1a4` |
+| `Documentation/galung_api_v1/identity-openapi-candidate.json` | `cfb6f7569820bf235e2fd7de285210df6fdec1a149863f48da4b04b1c2408b21` |
 
 Commercial `CONTRACT_VERSION_MANIFEST.md` remains `CANDIDATE / NOT FROZEN`. A reviewer-requested edit requires recalculating these hashes and reviewing the new revision.

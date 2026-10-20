@@ -11,6 +11,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 API = json.loads((ROOT / "galung_api_v1/openapi.json").read_text())
 SQL = (ROOT / "database/003_phase00_contract_delta.sql").read_text()
 TERM_SQL = (ROOT / "database/004_fixed_subscription_terms.sql").read_text()
+IDENTITY = json.loads((ROOT / "galung_api_v1/identity-openapi-candidate.json").read_text())
+IDENTITY_SQL = (ROOT / "database/005_identity_contract_candidate.sql").read_text()
 
 
 class ContractDraftTests(unittest.TestCase):
@@ -68,6 +70,15 @@ class ContractDraftTests(unittest.TestCase):
         schemas = API["components"]["schemas"]
         for name in ("AssetUploadRequest", "AssetFinalization"):
             self.assertEqual(schemas[name]["properties"]["sizeBytes"]["maximum"], 10 * 1024 * 1024)
+
+    def test_identity_review_contract(self) -> None:
+        login = IDENTITY["paths"]["/auth/login"]["post"]
+        self.assertIn("202", login["responses"])
+        self.assertEqual(login["responses"]["202"]["content"]["application/json"]["schema"]["$ref"], "#/components/schemas/MfaPending")
+        for path in ("/auth/mfa/complete", "/auth/mfa/recovery", "/me/sessions", "/me/legal-acceptances"):
+            self.assertIn(path, IDENTITY["paths"])
+        self.assertIn("csrf_secret_hash", IDENTITY_SQL)
+        self.assertIn("uq_auth_factors_one_active_totp", IDENTITY_SQL)
 
     def test_desktop_contract(self) -> None:
         for path in [
