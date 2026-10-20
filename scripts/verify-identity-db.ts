@@ -40,7 +40,7 @@ async function main() {
       VALUES($1,$2) RETURNING id`, [`phase02-race-${randomUUID()}@example.invalid`, 'synthetic-no-login']);
     const store = new IdentityStore();
     try {
-      const challenge = await store.challenge(raceUser.rows[0].id, 'password_reset', 'customer', 10, 'postgres16-race');
+      const challenge = await store.challenge(raceUser.rows[0].id, 'password_reset', 'customer', 10, 'postgres16-race', randomBytes(32));
       const results = await Promise.all([
         store.resetPassword(challenge.token, 'synthetic-hash-1', 'postgres16-race'),
         store.resetPassword(challenge.token, 'synthetic-hash-2', 'postgres16-race'),
