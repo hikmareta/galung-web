@@ -4,6 +4,8 @@
 
 **Gate amendment selected 2026-10-18 (ODL-007):** The Product Owner selected an identity-only path. Phase 02 implementation still requires explicit Phase 01 exit approval and a versioned identity ADR/SQL/OpenAPI package reviewed by Security, Tech Lead and QA. Full commercial Gate A remains open; no commercial, payment, subscription, licensing or desktop activation implementation is authorized by this selection.
 
+**Gate update 2026-10-20 (ODL-008):** PR #3 head `08a271d` received Tech Lead/Security/QA approval, passed required checks and merged as `9d48ac2`. The Product Owner explicitly closed Phase 01 and authorized Phase 02 in a separate chat. The hashed identity package in `Documentation/implementation/phase_00/IDENTITY_CONTRACT_MANIFEST.md` is frozen for Phase 02 implementation scope only. Phase 02 must reconcile the identity overlay with canonical OpenAPI and test the candidate SQL before application. Full commercial Gate A and production migration approvals remain open.
+
 ## Ready-to-paste AI Developer implementation prompt
 
 ```text

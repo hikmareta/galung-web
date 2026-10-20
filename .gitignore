@@ -11,4 +11,7 @@ coverage/
 .DS_Store
 .pnpm-store/
 *.tsbuildinfo
+playwright-report/
+playwright-report-integration/
+test-results/
 **/.turbo/

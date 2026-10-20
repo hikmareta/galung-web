@@ -20,6 +20,8 @@
 | 02 | Identity, RBAC & Account Security | 2–3 weeks | Foundation + identity ADR | P0 |
 
 **2026-10-18 scoped Gate A amendment selected (ODL-007):** Phase 02 may begin only after the Phase 01 exit is explicitly approved and a versioned identity SQL/OpenAPI/ADR contract receives Security, Tech Lead and QA review. This is an identity-only exception to the full Gate A dependency. The full commercial contract remains candidate and all non-identity Gate A P0 items continue to block their affected phases. Selection of the amendment is not itself a Phase 02 start authorization.
+
+**2026-10-20 ODL-008:** Those limited entry conditions were met by reviewed and merged PR #3, the hashed identity package and the Product Owner's explicit Phase 01 exit decision. Phase 02 identity/RBAC/account-security work is authorized for a separate session. Commercial Gate A, production migration and other phase gates remain open.
 | 03 | Catalog, Pricing, Bank Configuration & CMS | 3–4 weeks | Auth + schema versioned | P0 |
 | 04 | Checkout, Orders & Invoices | 2–3 weeks | Catalog + identity + currencies approved | P0 |
 | 05 | Payment Proof & Manual Finance Verification | 3–4 weeks | Orders + private storage + audit | P0 |

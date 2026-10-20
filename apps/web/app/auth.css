@@ -1,0 +1,20 @@
+:root { color-scheme: light; font-family: system-ui, sans-serif; background: #f6f7fb; color: #172333; }
+body { margin: 0; }
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 1rem; box-sizing: border-box; }
+.auth-card { width: min(100%, 35rem); box-sizing: border-box; background: #fff; padding: clamp(1rem, 4vw, 2rem); border: 1px solid #c8d2dd; border-radius: .75rem; box-shadow: 0 .5rem 2rem #17233312; }
+.auth-card h1 { margin-top: 0; line-height: 1.25; }
+.auth-card h1 span { font-size: .7em; font-weight: 400; }
+.auth-card form { display: grid; gap: .75rem; }
+.auth-card label { font-weight: 600; }
+.auth-card input:not([type=checkbox]), .auth-card select { box-sizing: border-box; width: 100%; min-height: 2.75rem; padding: .5rem .65rem; border: 1px solid #64778c; border-radius: .35rem; font: inherit; }
+.auth-card button { min-height: 2.75rem; padding: .5rem .8rem; border: 0; border-radius: .35rem; background: #134b80; color: white; font: inherit; font-weight: 600; cursor: pointer; }
+.auth-card button:disabled { opacity: .6; cursor: not-allowed; }
+.auth-card a { color: #064477; }
+.auth-card :focus-visible { outline: 3px solid #e68a00; outline-offset: 2px; }
+.auth-card .check { display: flex; gap: .5rem; align-items: flex-start; font-weight: 400; }
+.auth-card .check input { margin-top: .3rem; }
+.auth-card .password-row { display: flex; gap: .5rem; }
+.auth-card .password-row button { flex: 0 0 auto; }
+.auth-card .error { color: #9d1c1c; }
+.auth-card .success { color: #075b36; }
+@media (max-width: 420px) { .auth-card .password-row { flex-direction: column; } }

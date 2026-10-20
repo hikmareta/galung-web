@@ -7,6 +7,8 @@ const migrations = [
   ['001_core_schema', 'Documentation/database/001_core_schema.sql'],
   ['003_phase00_contract_delta', 'Documentation/database/003_phase00_contract_delta.sql'],
   ['004_fixed_subscription_terms', 'Documentation/database/004_fixed_subscription_terms.sql'],
+  ['005_identity_contract_candidate', 'Documentation/database/005_identity_contract_candidate.sql'],
+  ['006_identity_runtime', 'Documentation/database/006_identity_runtime.sql'],
 ] as const;
 const environment = process.env.APP_ENV;
 if (!['local', 'test', 'staging'].includes(environment ?? '')) throw new Error('Draft migrations cannot run in production');
