@@ -1,6 +1,6 @@
 # Phase 02 — Identity, RBAC & Account Security — acceptance report
 
-Date: 2026-10-20. **Gate verdict: BLOCKED for exit and deployment.** PostgreSQL 16, Redis, browser automation, and hosted CI checks passed. Approved Legal content, official SMTP configuration, and independent Security/Tech Lead/QA review remain outstanding. No Phase 03 work was started.
+Date: 2026-10-20. **Gate verdict: BLOCKED for exit and deployment.** PostgreSQL 16, Redis, browser automation, and hosted CI checks passed. The Product Owner confirmed that the Tech Lead's approval represents Security and QA as well. Approved Legal content and official SMTP configuration remain outstanding. No Phase 03 work was started.
 
 ## Scope and contracts
 
@@ -36,9 +36,9 @@ Initial CI attempts uncovered missing synthetic outbox encryption config and a v
 
 ## Review and remaining gate items
 
-[Draft PR #5](https://github.com/hikmareta/galung-web/pull/5) requests independent review. At this report revision, **no Security, Tech Lead, or QA approval is recorded**. Phase 01 [PR #4](https://github.com/hikmareta/galung-web/pull/4) is still open, so default-branch integration depends on its disposition.
+[PR #5](https://github.com/hikmareta/galung-web/pull/5) received an `APPROVED` review from `dhikandhika` on commit `a4c9605` at 2026-10-20 07:35 UTC and was merged into `codex/phase-01-owner-exit`. The Product Owner subsequently confirmed in this task that this Tech Lead approval also represents Security and QA. This is **one delegated approval covering three review roles**, not three separate GitHub approvals. Phase 01 [PR #4](https://github.com/hikmareta/galung-web/pull/4) is still open, so default-branch integration depends on its disposition.
 
 1. Obtain Legal-approved published Terms and Privacy versions/URLs and official SMTP sender/service. Validate actual bilingual email delivery and links. The Product Owner deferred these decisions until the end.
-2. Obtain Security, Tech Lead, and QA review of SQL 006, OpenAPI v2, key custody/rotation, least-privilege grants, deployment configuration, and browser/accessibility evidence. Manual assistive-technology checks remain for QA. Resolve findings and obtain Product Owner Phase 02 gate approval before Phase 03.
+2. Complete any manual assistive-technology checks and resolve any findings required by the delegated reviewer. Obtain Product Owner Phase 02 gate approval after the Legal and SMTP decisions before Phase 03.
 
-The draft migration revokes legacy sessions lacking new policy fields. For a failed staging rollout, disable `IDENTITY_ENABLED`, stop delivery, and revert the application release while retaining migration and audit history. Do not apply draft migrations to production until contract and migration approval. Automated evidence cannot establish complete accessibility, SMTP delivery, or independent security approval; the phase is not closed.
+The draft migration revokes legacy sessions lacking new policy fields. For a failed staging rollout, disable `IDENTITY_ENABLED`, stop delivery, and revert the application release while retaining migration and audit history. Do not apply draft migrations to production until the remaining release gates are satisfied. Automated evidence cannot establish complete accessibility or SMTP delivery; the phase is not closed.
