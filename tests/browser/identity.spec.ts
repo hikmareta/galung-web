@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 const customer = 'http://127.0.0.1:3000';
 const admin = 'http://127.0.0.1:3001';
@@ -106,4 +107,12 @@ test('mobile auth controls fit viewport and have keyboard focus', async ({ page 
   await expect(page.locator(':focus-visible')).toHaveCount(1);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
+});
+
+test('customer and admin login meet automated WCAG 2.2 AA checks', async ({ page }) => {
+  for (const origin of [customer, admin]) {
+    await page.goto(`${origin}/login`);
+    const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(result.violations.map(({ id, nodes }) => ({ id, targets: nodes.map(node => node.target) }))).toEqual([]);
+  }
 });
