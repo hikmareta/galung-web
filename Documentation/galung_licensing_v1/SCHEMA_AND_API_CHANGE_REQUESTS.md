@@ -2,7 +2,7 @@
 
 **Status:** proposed delta, not applied migrations. Cross-check with `/galung_database_v1/001_core_schema.sql` and `/galung_api_v1/openapi.yaml` before implementing.
 
-**Phase 00 update:** Actual repository paths are `Documentation/database/001_core_schema.sql` and `Documentation/galung_api_v1/openapi.yaml`. The additive `Documentation/database/003_phase00_contract_delta.sql` and OpenAPI 1.1.0-draft.1 now express proposed claims, challenges, device keys, rotating refresh credentials, signing-key registry, license revisions and per-device token issuance. They remain review drafts, not deployed migrations or a security signoff. Do not close the P0 request until PostgreSQL 16, API and Windows interoperability tests pass.
+**Phase 00 update:** Actual repository paths are `Documentation/database/001_core_schema.sql` and `Documentation/galung_api_v1/openapi.yaml`. The additive `Documentation/database/003_phase00_contract_delta.sql` and OpenAPI 1.1.0-draft.2 now express proposed claims, challenges, device keys, rotating refresh credentials, signing-key registry, license revisions and per-device token issuance. They remain review drafts, not deployed migrations or a security signoff. Do not close the P0 request until PostgreSQL 16, API and Windows interoperability tests pass.
 
 ## Database migrations (P0)
 

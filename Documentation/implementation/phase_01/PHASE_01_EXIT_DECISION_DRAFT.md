@@ -1,0 +1,7 @@
+# Pernyataan keputusan keluar Fase 01 — draf untuk Product Owner
+
+**Status:** BELUM BERLAKU. Teks ini disiapkan untuk keputusan eksplisit Product Owner setelah paket identitas dan revisi PR terbaru ditinjau. Penulisan draf oleh pengembang tidak dianggap sebagai persetujuan pemilik produk.
+
+> Saya, Product Owner Galung.id, menyetujui keluarnya proyek dari Fase 01 **hanya untuk memulai Fase 02 identitas, RBAC, dan keamanan akun** sesuai jalur terbatas ODL-007. Persetujuan ini berlaku untuk revisi PR terbaru **[isi SHA yang telah lulus pemeriksaan dan ditinjau]** serta paket kontrak identitas **[isi versi dan SHA-256 manifest]**, setelah terdapat persetujuan tertulis Security, Tech Lead, dan QA atas revisi dan paket yang sama. Saya menerima bahwa Gate A komersial penuh tetap `CANDIDATE / NOT FROZEN`. Pengembangan harga, rekening, checkout, pembayaran, langganan, entitlement, lisensi, dan aktivasi desktop serta migrasi draf ke produksi tetap tertahan oleh gate masing-masing. Keputusan ini tidak menyatakan perilaku bisnis yang belum diimplementasikan telah lulus pengujian.
+
+**Catatan keputusan yang harus diisi oleh Product Owner:** nama/identitas, tanggal dan waktu Asia/Jakarta, SHA PR, versi/hash paket identitas, tautan review Security/Tech Lead/QA, dan pernyataan `DISETUJUI` atau `DITOLAK`. Setelah dicatat, pindahkan keputusan final ke log pemilik produk dan laporan penerimaan Fase 01. Jangan mengisi persetujuan secara otomatis dari status merge PR.

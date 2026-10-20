@@ -4,7 +4,7 @@
 
 Secure Windows activation for Galung Basic/Pro. Desktop application remains usable temporarily offline for a maximum of **336 hours** since successful online refresh, **never** past effective paid/grace entitlement validity.
 
-**Phase 00 draft update:** Admin issuance commits a signed license issuance artifact and claimable entitlement revision before device activation. This marks `entitlement_ready_at`; device-bound offline JWS issuance happens later on activation/validation. The companion OpenAPI 1.1.0-draft.1 and `database/003_phase00_contract_delta.sql` are proposed contracts, not deployed behavior.
+**Phase 00 draft update:** Admin issuance commits a signed license issuance artifact and claimable entitlement revision before device activation. This marks `entitlement_ready_at`; device-bound offline JWS issuance happens later on activation/validation. The companion OpenAPI 1.1.0-draft.2 and `database/003_phase00_contract_delta.sql` are proposed contracts, not deployed behavior.
 
 ## Protocol phases
 

@@ -1,6 +1,6 @@
 # GALUNG.ID — LICENSING PROTOCOL SPECIFICATION v1.0
 
-**Status:** Phase 00 reconciled **draft**, pending Security/Desktop review and Gate A approval. **Scope:** Galung Basic and Pro Windows desktop, per-package configurable device seats, manual finance approval and separate admin license issuance. **Out of scope:** Song Library Premium and institutional seat delegation (future versions). **Canonical time:** UTC, RFC 3339 externally, PostgreSQL `timestamptz` internally. Companion drafts: `database/003_phase00_contract_delta.sql` and `galung_api_v1/openapi.yaml` 1.1.0-draft.1.
+**Status:** Phase 00 reconciled **draft**, pending Security/Desktop review and Gate A approval. **Scope:** Galung Basic and Pro Windows desktop, per-package configurable device seats, manual finance approval and separate admin license issuance. **Out of scope:** Song Library Premium and institutional seat delegation (future versions). **Canonical time:** UTC, RFC 3339 externally, PostgreSQL `timestamptz` internally. Companion drafts: `database/003_phase00_contract_delta.sql` and `galung_api_v1/openapi.yaml` 1.1.0-draft.2.
 
 ## 1. Authority and invariants
 

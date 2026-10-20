@@ -239,7 +239,7 @@ This document extends `PRODUCT_REQUIREMENTS.md`, `BUSINESS_RULES_AND_FLOWS.md`, 
 **Users:** Order owner  
 **Objective:** Capture transfer claim—never activate subscription.
 
-**Screen anatomy / content hierarchy:** Sender legal name, origin bank (optional by route), transfer time/date, sent amount and currency, international remittance ref, file chooser JPG/PNG/PDF (≤5MB), declaration and preview.
+**Screen anatomy / content hierarchy:** Sender legal name, origin bank (optional by route), transfer time/date, sent amount and currency, international remittance ref, file chooser JPG/PNG/PDF (≤10 MB), declaration and preview.
 
 **Primary interactions:** Submit for Verification.
 
@@ -607,7 +607,7 @@ This document extends `PRODUCT_REQUIREMENTS.md`, `BUSINESS_RULES_AND_FLOWS.md`, 
 | Payment proof | date/time sent | required; time zone or explicit localized conversion | Distinguish transfer initiation from arrival |
 | Payment proof | sent amount/currency | required; positive numeric and ISO 4217 currency | Never assume received amount equals sent amount |
 | Payment proof | remittance reference | required if transfer type provides it | May differ from company-bank credit reference |
-| Payment proof | attachment | required; JPG/PNG/PDF, max 5MB; scan before access | Do not publicly expose URL |
+| Payment proof | attachment | required; JPG/PNG/PDF, max 10 MB; scan before access | Do not publicly expose URL |
 | Finance review | received amount + currency | required for approval; must match actual bank credit | Verify independently with bank record |
 | Finance review | bank credit reference/time | required for approval | Unique/idempotent bank reference check |
 | Finance review | reason on rejection/revision | required | Visible sanitized reason to customer |

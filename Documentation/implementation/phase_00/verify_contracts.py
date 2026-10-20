@@ -64,6 +64,11 @@ class ContractDraftTests(unittest.TestCase):
         self.assertIn("(term_days * 24) * interval '1 hour'", TERM_SQL)
         self.assertIn("CASE term_days WHEN 1 THEN 30 WHEN 12 THEN 365 END", TERM_SQL)
 
+    def test_proof_upload_limit(self) -> None:
+        schemas = API["components"]["schemas"]
+        for name in ("AssetUploadRequest", "AssetFinalization"):
+            self.assertEqual(schemas[name]["properties"]["sizeBytes"]["maximum"], 10 * 1024 * 1024)
+
     def test_desktop_contract(self) -> None:
         for path in [
             "/me/licenses/{id}/activation-claims",
